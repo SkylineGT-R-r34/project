@@ -8,13 +8,16 @@
     <%- include ('navigationBar/navBar') %>
     <div class="main-content">
     <h1><%= title %></h1>
-    <% if (user) { %>
-      <p>Welcome back, <strong><%= user.fullName %></strong>!</p>
-      <p>You are logged in as <%= user.email %>. Explore the dashboard to manage your events and wellbeing tools.</p>
-    <% } else { %>
-      <p>Welcome to <%= title %>.</p>
-      <p><a href="/auth/login">Log in</a> to access personalised resources, track your mood, and connect with campus life.</p>
-    <% } %>
+      <% if (user) { %>
+        <p>Welcome back, <strong><%= user.fullName || user.email %></strong>!</p>
+        <p>You’re signed in. Use the navigation menu to explore mood tracking, resources, and the rest of the CampusWell experience.</p>
+      <% } else { %>
+        <p>Sign in or create an account to access personalised campus resources, track your wellbeing, and stay connected with the community.</p>
+        <div class="cta-row">
+          <a class="auth-link auth-link-primary" href="/auth/login">Sign in</a>
+          <a class="auth-link" href="/auth/signup">Create account</a>
+        </div>
+      <% } %>
     </div>
   </body>
 </html>

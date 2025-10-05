@@ -76,6 +76,75 @@ label.burger:hover {
   color: white;
   padding: 1rem;
 }
+
+.user-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem 1.5rem;
+  color: #e6f0ff;
+}
+
+.user-greeting {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.auth-link,
+.link-button {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.auth-link:hover,
+.link-button:hover,
+.auth-link:focus,
+.link-button:focus {
+  background: rgba(255, 255, 255, 0.25);
+  color: #0b1f3a;
+}
+
+.auth-link-primary {
+  background: #00bfff;
+  color: #0b1f3a;
+}
+
+.auth-link-primary:hover,
+.auth-link-primary:focus {
+  background: #57d3ff;
+}
+
+.user-panel form {
+  margin: 0;
+}
+
+.link-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+
+.link-button {
+  font: inherit;
+}
+
+.user-panel .link-button {
+  align-self: flex-start;
+}
+
+.cta-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -105,31 +174,7 @@ label.burger:hover {
   color: white;
   border-radius: 5px;
 }
-.sidebar ul li form.logout-form {
-  margin: 0;
-  display: block;
-}
-.logout-button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  color: #000;
-  font-weight: bold;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: left;
-}
-.logout-button:hover {
-  background-color: #357abd;
-  color: #fff;
-}
-.logout-button .sidebar-icon {
-  pointer-events: none;
-}
+
 /* MAIN CONTENT */
 .main-content {
   margin-left: 6%;
@@ -203,6 +248,22 @@ label.burger:hover {
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fca5a5;
+}
+
+.form-footer {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.form-footer a {
+  font-weight: 600;
+}
+
+.label-optional {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: #6b7280;
 }
 
 @media (max-width: 649px) {

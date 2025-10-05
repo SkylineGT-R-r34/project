@@ -1,11 +1,22 @@
 <!-- open button -->
- 
+
 <input class="burgerBox" type="checkbox" id="hamburger">
 <label for="hamburger" class="burger">&#9776;</label>
 <nav class="sidebar">
   <!-- close button inside sidebar -->
   <label for="hamburger" class="burger-inside">&#9776;</label>
   <h2>CampusWell</h2>
+  <div class="user-panel">
+    <% if (user) { %>
+      <p class="user-greeting">Signed in as <strong><%= user.fullName || user.email %></strong></p>
+      <form method="post" action="/auth/logout">
+        <button type="submit" class="link-button">Log out</button>
+      </form>
+    <% } else { %>
+      <a href="/auth/login" class="auth-link">Sign in</a>
+      <a href="/auth/signup" class="auth-link auth-link-primary">Create account</a>
+    <% } %>
+  </div>
   <ul>
     <li>
       <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">
@@ -37,26 +48,6 @@
         <img src="/image/danger.png" class="sidebar-icon"> Alerts
       </a>
     </li>
-    <% if (user) { %>
-      <li>
-        <a href="/profile" class="<%= currentPath === '/profile' ? 'active' : '' %>">
-          <img src="/image/user.png" class="sidebar-icon"> <%= user.fullName %>
-        </a>
-      </li>
-      <li>
-        <form method="POST" action="/auth/logout" class="logout-form">
-          <button type="submit" class="logout-button">
-            <img src="/image/exit.png" class="sidebar-icon" alt="" /> Logout
-          </button>
-        </form>
-      </li>
-    <% } else { %>
-      <li>
-        <a href="/auth/login" class="<%= currentPath === '/auth/login' ? 'active' : '' %>">
-          <img src="/image/user.png" class="sidebar-icon"> Login
-        </a>
-      </li>
-    <% } %>
   </ul>
 </nav>
 <script>

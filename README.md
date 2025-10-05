@@ -55,7 +55,7 @@ docker-compose -f .devcontainer/docker-compose.yml up -d app
 docker exec -it $(docker ps -qf "name=app") bash
 ```
 
-- To start the project, run: 
+- To start the project, run:
 ```sh
 npm run dev
 ```
@@ -87,7 +87,23 @@ PGPORT=5432
 JWT_SECRET=change-me
 # Optional:
 # JWT_EXPIRES_IN=1h
-# JWT_COOKIE_MAX_AGE_MS=3600000
 ```
 
 `JWT_SECRET` must be a sufficiently random string; update it in production to keep issued tokens secure.
+
+### Authentication workflow
+
+CampusWell now ships with fully functional sign-in and sign-up pages powered by JWTs.
+
+- Visit [`/auth/login`](http://localhost:3000/auth/login) to sign in with an existing account.
+- Visit [`/auth/signup`](http://localhost:3000/auth/signup) to create a new account.
+
+Successful form submissions issue a JWT, store it in an HTTP-only cookie, and redirect you back to the dashboard. The navigation menu displays the current user and exposes a **Log out** button that clears the cookie.
+
+For API or mobile clients you can still interact with the JSON endpoints directly:
+
+- `POST /auth/signup` – Provide `email`, `password`, and `fullName` (optional `role`) in the JSON body to create an account and receive a JWT in the response.
+- `POST /auth/login` – Provide `email` and `password` in the JSON body to verify credentials and receive a JWT in the response.
+- `POST /auth/logout` – Clears the authentication cookie. When using bearer tokens, simply discard the token client-side.
+
+Include the JWT in an `Authorization: Bearer <token>` header to access protected routes programmatically.
