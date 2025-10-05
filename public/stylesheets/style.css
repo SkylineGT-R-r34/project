@@ -105,6 +105,31 @@ label.burger:hover {
   color: white;
   border-radius: 5px;
 }
+.sidebar ul li form.logout-form {
+  margin: 0;
+  display: block;
+}
+.logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+}
+.logout-button:hover {
+  background-color: #357abd;
+  color: #fff;
+}
+.logout-button .sidebar-icon {
+  pointer-events: none;
+}
 /* MAIN CONTENT */
 .main-content {
   margin-left: 6%;
@@ -124,6 +149,60 @@ label.burger:hover {
   #hamburger:checked ~ .main-content {
     margin-left: 20%;
   }
+}
+
+.form-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-card label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-card input[type="email"],
+.form-card input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+}
+
+.form-card button[type="submit"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #4a90e2;
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.form-card button[type="submit"]:hover {
+  background: #357abd;
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
 }
 
 @media (max-width: 649px) {

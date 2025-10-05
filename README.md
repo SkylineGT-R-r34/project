@@ -73,3 +73,21 @@ Your Express app will be running at [http://localhost:3000](http://localhost:300
   docker-compose -f .devcontainer/docker-compose.yml down -v
   docker-compose -f .devcontainer/docker-compose.yml up -d db
   ```
+
+### Authentication environment variables
+
+Create a `.env` file in the project root (or update your existing file) and provide the following values so that JWT authentication can work:
+
+```
+PGHOST=localhost
+PGUSER=dev
+PGPASSWORD=dev
+PGDATABASE=campusWell
+PGPORT=5432
+JWT_SECRET=change-me
+# Optional:
+# JWT_EXPIRES_IN=1h
+# JWT_COOKIE_MAX_AGE_MS=3600000
+```
+
+`JWT_SECRET` must be a sufficiently random string; update it in production to keep issued tokens secure.
