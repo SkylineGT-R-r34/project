@@ -37,6 +37,26 @@
         <img src="/image/danger.png" class="sidebar-icon"> Alerts
       </a>
     </li>
+    <% if (user) { %>
+      <li>
+        <a href="/profile" class="<%= currentPath === '/profile' ? 'active' : '' %>">
+          <img src="/image/user.png" class="sidebar-icon"> <%= user.fullName %>
+        </a>
+      </li>
+      <li>
+        <form method="POST" action="/auth/logout" class="logout-form">
+          <button type="submit" class="logout-button">
+            <img src="/image/exit.png" class="sidebar-icon" alt="" /> Logout
+          </button>
+        </form>
+      </li>
+    <% } else { %>
+      <li>
+        <a href="/auth/login" class="<%= currentPath === '/auth/login' ? 'active' : '' %>">
+          <img src="/image/user.png" class="sidebar-icon"> Login
+        </a>
+      </li>
+    <% } %>
   </ul>
 </nav>
 <script>

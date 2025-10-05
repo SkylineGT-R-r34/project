@@ -106,6 +106,31 @@ label.burger:hover {
   border-radius: 5px;
 }
 
+.sidebar ul li form.logout-form {
+  margin: 0;
+  display: block;
+}
+.logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+}
+.logout-button:hover {
+  background-color: #357abd;
+  color: #fff;
+}
+.logout-button .sidebar-icon {
+  pointer-events: none;
+}
 /* MAIN CONTENT */
 .main-content {
   margin-left: 6%;

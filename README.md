@@ -99,3 +99,7 @@ The authentication flow now mirrors a typical JSON Web Token API:
 - `POST /auth/login` – Accepts `email` and `password` in the JSON body, verifies the credentials, and returns a JWT.
 
 Both responses follow the structure demonstrated in the snippet and include the `token` alongside the user metadata so that clients can persist the JWT and send it in an `Authorization: Bearer <token>` header for protected requests.
+# JWT_COOKIE_MAX_AGE_MS=3600000
+```
+
+`JWT_SECRET` must be a sufficiently random string; update it in production to keep issued tokens secure.
