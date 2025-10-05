@@ -73,3 +73,4 @@ Your Express app will be running at [http://localhost:3000](http://localhost:300
   docker-compose -f .devcontainer/docker-compose.yml down -v
   docker-compose -f .devcontainer/docker-compose.yml up -d db
   ```
+- The API expects a `JWT_SECRET` environment variable to be set for signing authentication tokens. Add this to your `.env` file before starting the server.
