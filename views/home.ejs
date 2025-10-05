@@ -8,16 +8,8 @@
     <%- include ('navigationBar/navBar') %>
     <div class="main-content">
     <h1><%= title %></h1>
-      <% if (user) { %>
-        <p>Welcome back, <strong><%= user.fullName || user.email %></strong>!</p>
-        <p>You’re signed in. Use the navigation menu to explore mood tracking, resources, and the rest of the CampusWell experience.</p>
-      <% } else { %>
-        <p>Sign in or create an account to access personalised campus resources, track your wellbeing, and stay connected with the community.</p>
-        <div class="cta-row">
-          <a class="auth-link auth-link-primary" href="/auth/login">Sign in</a>
-          <a class="auth-link" href="/auth/signup">Create account</a>
-        </div>
-      <% } %>
+    <p>Welcome to <%= title %></p>  
+    <p>Example of how the page will be with new navbar</p>
     </div>
   </body>
 </html>

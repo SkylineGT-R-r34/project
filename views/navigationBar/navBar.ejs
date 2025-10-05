@@ -1,54 +1,53 @@
 <!-- open button -->
-
+ 
 <input class="burgerBox" type="checkbox" id="hamburger">
 <label for="hamburger" class="burger">&#9776;</label>
 <nav class="sidebar">
   <!-- close button inside sidebar -->
   <label for="hamburger" class="burger-inside">&#9776;</label>
   <h2>CampusWell</h2>
-  <div class="user-panel">
-    <% if (user) { %>
-      <p class="user-greeting">Signed in as <strong><%= user.fullName || user.email %></strong></p>
-      <form method="post" action="/auth/logout">
-        <button type="submit" class="link-button">Log out</button>
-      </form>
-    <% } else { %>
-      <a href="/auth/login" class="auth-link">Sign in</a>
-      <a href="/auth/signup" class="auth-link auth-link-primary">Create account</a>
-    <% } %>
-  </div>
   <ul>
-    <li>
-      <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">
-        <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
-      </a>
-    </li>
-    <li>
-      <a href="/mood" class="<%= currentPath === '/mood' ? 'active' : '' %>">
-        <img src="/image/mood.png" class="sidebar-icon"> Mood Tracker
-      </a>
-    </li>
-    <li>
-      <a href="/resources" class="<%= currentPath === '/resources' ? 'active' : '' %>">
-        <img src="/image/search.png" class="sidebar-icon"> Search & Discovery
-      </a>
-    </li>
-    <li>
-      <a href="/profile" class="<%= currentPath === '/profile' ? 'active' : '' %>">
-        <img src="/image/social.png" class="sidebar-icon"> Social Networking
-      </a>
-    </li>
-    <li>
-      <a href="#" class="<%= currentPath === '/gamification' ? 'active' : '' %>">
-        <img src="/image/gamification.png" class="sidebar-icon"> Gamification
-      </a>
-    </li>
-    <li>
-      <a href="#" class="<%= currentPath === '/alerts' ? 'active' : '' %>">
-        <img src="/image/danger.png" class="sidebar-icon"> Alerts
-      </a>
-    </li>
-  </ul>
+  <li>
+    <a href="/dashboard" class="<%= currentPath === '/' ? 'active' : '' %>">
+      <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
+    </a>
+  </li>
+  <li>
+    <a href="/mood" class="<%= currentPath === '/mood' ? 'active' : '' %>">
+      <img src="/image/mood.png" class="sidebar-icon"> Mood Tracker
+    </a>
+  </li>
+  <li>
+    <a href="/resources" class="<%= currentPath === '/resources' ? 'active' : '' %>">
+      <img src="/image/search.png" class="sidebar-icon"> Search & Discovery
+    </a>
+  </li>
+  <li>
+    <a href="/profile" class="<%= currentPath === '/profile' ? 'active' : '' %>">
+      <img src="/image/social.png" class="sidebar-icon"> Social Networking
+    </a>
+  </li>
+  <li>
+    <a href="#" class="<%= currentPath === '/gamification' ? 'active' : '' %>">
+      <img src="/image/gamification.png" class="sidebar-icon"> Gamification
+    </a>
+  </li>
+  <li>
+    <a href="#" class="<%= currentPath === '/alerts' ? 'active' : '' %>">
+      <img src="/image/danger.png" class="sidebar-icon"> Alerts
+    </a>
+  </li>
+  <li>
+    <a href="/logout" class="<%= currentPath === '/profile' ? 'active' : '' %>">
+      <img src="/image/user.png" class="sidebar-icon"> Profile
+    </a>
+  </li>
+  <li>
+    <a href="/logout">
+      <img src="/image/exit.png" class="sidebar-icon"> Logout
+    </a>
+  </li>
+</ul>
 </nav>
 <script>
   //Make the navbar responsive to window size (<650)
