@@ -1,0 +1,11 @@
+{
+  "name": "Devcontainer for team-3",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "extensions": ["dbaeumer.vscode-eslint", "ms-azuretools.vscode-docker"],
+  "postCreateCommand": "npm install"
+}
