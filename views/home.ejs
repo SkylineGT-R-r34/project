@@ -8,8 +8,13 @@
     <%- include ('navigationBar/navBar') %>
     <div class="main-content">
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>  
-    <p>Example of how the page will be with new navbar</p>
+    <% if (user) { %>
+      <p>Welcome back, <strong><%= user.fullName %></strong>!</p>
+      <p>You are logged in as <%= user.email %>. Explore the dashboard to manage your events and wellbeing tools.</p>
+    <% } else { %>
+      <p>Welcome to <%= title %>.</p>
+      <p><a href="/auth/login">Log in</a> to access personalised resources, track your mood, and connect with campus life.</p>
+    <% } %>
     </div>
   </body>
 </html>
