@@ -1,10 +1,6 @@
 import express from 'express';
 import pool from '../db/db.js';
-<<<<<<< HEAD
 import * as moodTracking from '../controllers/moodTracking.js';
-=======
-import * as moodTracking from '../controllers/moodTrackingController.js';
->>>>>>> fdfc0bdea97441257fbb2d4f91ca50634d907f18
 export const moodTrackingRouter = express.Router();
 moodTrackingRouter.get('/moodTrackingPage', moodTracking.index);
 // Get all mood of user
