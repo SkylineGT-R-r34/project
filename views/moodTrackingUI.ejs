@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<<<<<<< HEAD
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include ('navigationBar/navBar') %>
+    <div class="main-content">
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>  
+    <p>Example of how the page will be with new navbar</p>
+    </div>
+  </body>
+</html>
+=======
+
+<head>
+  <title>Mood Tracker</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  <%- include ('navigationBar/navBar') %>
+    <div class="main-content">
+      <div class="left-side">
+        <h1>Your Mood Status</h1>
+        <ul id="mood-list"></ul>
+      </div>
+      <div class="right-side">
+        <h1>Log Your Mood</h1>
+        <div class="mood-form-container">
+          <div class="user-picture">
+            <img src="#">
+            <h3>
+              <%= user.name %>
+            </h3>
+          </div>
+          <form id="moodForm">
+
+            <input type="hidden" id="user_id" value="<%= user.id %>">
+            <input type="hidden" name="user_id" value="<%= user.id %>">
+            <div>
+              <label
+                style="color:#017d71;font-weight: bold;padding-bottom:20px;display:inline-block;font-size: larger; ">Score
+                :</label><br>
+              <input style="width: 70px;height: 50px;border-radius: 10px;border-color: #017d71;" type="number"
+                placeholder="  1-10" name="score" min="1" max="10" required>
+            </div>
+            <div class="notes-input">
+              <div>
+                <label
+                  style="color:#017d71;font-weight: bold;padding-bottom:20px;display:inline-block;font-size: larger; ">Notes:</label><br>
+                <input style="width: 300px;height: 50px;border-radius: 20px;border-color: #017d71;" type="text"
+                  name="notes" placeholder="    How are you feeling?" required>
+              </div>
+              <button type="submit" class="mood-submit">Add Mood</button>
+            </div>
+          </form>
+        </div>
+        <!--end mood-->
+        <div class="graph_seek">
+          <div class="mood-graph">
+            <h1 style="color:#017d71;margin-top: 60px;">Mood Graph</h1>
+            <div class="chart-container">
+              <canvas id="moodChart"></canvas>
+            </div>
+
+            <!-- Load Chart.js -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+          </div>
+          <div class="seek">
+            <h1 style="color:#017d71;margin-top: 60px;">Seek Help</h1>
+            <h2>University Student Support</h2>
+            <p>If you are feeling stressed, anxious, or low, we here to help you.</p>
+            <ul>
+              <li><strong>Student Support:</strong> +61 123456789</li>
+              <li><strong>Student Support email:</strong> support@university.edu.au</li>
+              <li><strong>Appointment Booking:</strong> <a href="#">Click Here</a></li>
+            </ul>
+            <h3>Or you can leave quick message here we will contact you</h3>
+            <form id="helpForm">
+              <input type="hidden" name="user_id" value="<%= user.id %>">
+              <textarea name="message" placeholder="Do you need any help from us" required
+                style="width:100%;height:60px;"></textarea>
+              <button type="submit" class="mood-submit">Send Help Request</button>
+              <script src="/moodTrackingScript.js"></script>
+            </form>
+          </div>
+        </div>
+      </div>
+      <img src="/image/leaf.jpg"  style="width: 140px ; height: 140px;position: absolute;right: 0;top:83%">
+      <img src="/image/leaf(2).jpg"  style="width: 140px ; height: 140px;position: absolute;right: 0;top:0">
+    </div>
+  </body>   
+    </div>
+  </body>   
+
+</html>
+>>>>>>> fdfc0bdea97441257fbb2d4f91ca50634d907f18

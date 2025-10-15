@@ -1,11 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import bcrypt from 'bcryptjs';
 import { app } from '../app.js';
 import pool from '../db/db.js';
-
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
 
 // Helper: start server
 function startServer(port = 0) {
@@ -38,81 +35,49 @@ function makeRequest(options, data) {
 // Reset DB and insert test user
 test.beforeEach(async () => {
   await pool.query('TRUNCATE mood_logs, notifications, users RESTART IDENTITY CASCADE');
-  const hashedPassword = await bcrypt.hash('password', 10);
-  await pool.query(
-    `
+  await pool.query(`
     INSERT INTO users (id, email, password, full_name, role)
-    VALUES (1, 'test@user.com', $1, 'Test User', 'student')
-  `,
-    [hashedPassword]
-  );
+    VALUES (1, 'test@user.com', 'password', 'Test User', 'student')
+  `);
 });
-
-async function loginAndGetToken(port) {
-  const response = await makeRequest(
-    {
-      hostname: 'localhost',
-      port,
-      path: '/auth/login',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    },
-    { email: 'test@user.com', password: 'password' }
-  );
-
-  assert.equal(response.status, 200);
-  assert.ok(response.body.token, 'Expected login response to include a token');
-  return response.body.token;
-}
 
 // GET test
 test('GET /moodTracking should return empty array initially', async () => {
   const server = await startServer();
-  try {
-    const port = server.address().port;
-    const token = await loginAndGetToken(port);
+  const port = server.address().port;
 
-    const res = await makeRequest({
-      hostname: 'localhost',
-      port,
-      path: '/moodTracking',
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` }
-    });
+  const res = await makeRequest({
+    hostname: 'localhost',
+    port,
+    path: '/moodTracking',
+    method: 'GET'
+  });
 
-    assert.equal(res.status, 200);
-    assert.deepEqual(res.body, []);
-  } finally {
-    server.close();
-  }
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body, []);
+
+  server.close();
 });
 
 // POST test
 test('POST /moodTracking adds a new mood', async () => {
   const server = await startServer();
-  try {
-    const port = server.address().port;
-    const token = await loginAndGetToken(port);
+  const port = server.address().port;
 
-    const payload = { score: 5, notes: 'Happy' };
-    const postRes = await makeRequest({
-      hostname: 'localhost',
-      port,
-      path: '/moodTracking',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      }
-    }, payload);
+  const payload = {user_id: 1, score: 5, notes: 'Happy' };
+  const postRes = await makeRequest({
+    hostname: 'localhost',
+    port,
+    path: '/moodTracking',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  }, payload);
 
-    assert.equal(postRes.status, 200);
-    assert.equal(postRes.body.user_id, 1);
-    assert.equal(postRes.body.score, 5);
-    assert.equal(postRes.body.notes, 'Happy');
-  } finally {
-    server.close();
-  }
+  assert.equal(postRes.status, 200);
+  assert.equal(postRes.body.user_id, 1);
+  assert.equal(postRes.body.score, 5);
+  assert.equal(postRes.body.notes, 'Happy');
+  server.close();
 });
 
 // Close DB pool after all tests

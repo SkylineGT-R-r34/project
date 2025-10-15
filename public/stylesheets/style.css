@@ -109,13 +109,21 @@ label.burger:hover {
 .main-content {
   margin-left: 6%;
   padding: 2rem;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   transition: margin-left 0.3s ease;
 }
 #hamburger:checked ~ .main-content {
   margin-left: 12%;  
+}
+/* Adjust right-side and mood-list when sidebar is open */
+#hamburger:checked ~ .main-content .right-side {
+  margin-left: 25%; 
+}
+/* Adjust mood-list margin when sidebar is open */
+#hamburger:checked ~ .main-content #mood-list {
+  margin-right: 10%;
 }
 @media (max-width: 1600px) {
   .main-content {
@@ -137,4 +145,158 @@ label.burger:hover {
   #hamburger:checked ~ .main-content {
     filter: blur(4px);
   }
+}
+/* Mood Tracking Specific Styles */
+.left-side {
+  width: 40%;
+  padding: 20px;
+  border-right: 1px solid #ccc;
+  background-color: rgb(213, 235, 233);
+  height: 97%;
+  border-radius: 50px;
+
+}
+.left-side
+  h1 {
+    margin-left: 10%;
+    padding: 20px;
+    color: #017d71;
+  }
+.right-side {
+  padding-top: 2%;
+  width: 60%;
+  padding-left: 60px;
+  background-color: #ffffff;
+  top: 4%; 
+  position: absolute;
+  height: 90%;
+  border-radius: 50px;
+  margin-left: 30%;
+}
+.right-side h1 {
+    color: #017d71;
+  }
+/* Mood List Styles */
+#mood-list {
+  list-style: none;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  margin-left: 8%;
+  gap: 10px;
+  max-height: 650px; /* limit height */
+  overflow-y: auto; /* enable vertical scrolling */
+}
+/* Custom scrollbar for WebKit browsers */
+#mood-list::-webkit-scrollbar {
+  width: 6px;
+}
+.mood-item {
+ width: 80%;           
+  max-width: 600px;     
+  border: 1px solid #ccc;
+  border-radius: 15px; 
+  padding: 30px;       
+  background-color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* stronger shadow */
+  font-size: 1.1rem;  
+}
+/* Mood Item Content */
+.mood-container {
+  display: flex;
+  flex-direction: column; 
+  gap: 5px;
+}
+.mood-score {
+  font-weight: bold;
+  color:  #017d71;
+}
+
+.mood-notes {
+  font-style: italic;
+  color: #333;
+  padding: 10px 0 0 0;
+}
+
+.mood-datetime {
+  display: flex;
+  flex-direction: row;
+  gap: 40%;
+  font-size: 0.85em;
+  color: #666;
+  padding: 10px 0 0 0;
+}
+/* Mood Form Styles */
+form#moodForm {
+  display: flex;
+  flex-direction: row;
+  gap: 150px;
+  margin-top: 20px;
+  margin-left: 17%;
+  width: 60%;
+}
+button.mood-submit {
+  background-color: #017d71;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  width: 200px;
+  margin-top: 20px;
+}
+.note-input {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+}
+.user-picture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* centers horizontally */
+  justify-content: center;
+  gap: 10px;             /* spacing between image & text */
+  margin-top: 20px;
+  background-color: #ffffff;
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  padding: 10px;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* soft shadow */
+}
+.user-picture img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;      /* makes it round */
+  object-fit: cover;       /* keeps image ratio */
+  background-color: #017d71;
+  
+}
+.user-picture span {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+.mood-form-container {
+display: flex;
+flex-direction: row;
+gap: 20px;
+}
+/* Chart Container */
+.chart-container {
+  width: 600px; 
+}
+
+.chart-container canvas {
+  width: 100%;
+  height: 100%;
+}
+/*block for seek help section*/
+.graph_seek {
+  display: flex;
+ flex-direction: row;
+ gap: 20px;
 }
