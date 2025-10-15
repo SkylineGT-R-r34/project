@@ -1,3 +1,4 @@
+/*############################### Global Styles ##########################*/
 body {
   margin: 0;
   padding: 0;
@@ -21,14 +22,14 @@ label.burger {
   height: 100px;
   font-size: 1.8rem;
   color: #fff;
-  background: #4a90e2;
+  background: #017d71;
   border-radius: 0 0 90% 0;
   cursor: pointer;
   text-align: center;
   transition: transform 0.5s ease, opacity 0.5s ease;
 }
 label.burger:hover {
-  background: #76baff;
+  background: #04a090;
 }
 .burgerBox {
   display: none;  /* hide the checkbox */
@@ -63,7 +64,7 @@ label.burger:hover {
   position: fixed;
   top: 0;
   left: 0;
-  background-color: #4a90e2;
+  background-color: #017d71;
   overflow: hidden;
   transform: translateX(-100%); 
   transition: transform 0.5s ease;
@@ -92,7 +93,7 @@ label.burger:hover {
   border-radius: 4px;
 }
 .sidebar ul li a:hover {
-  background-color: #357ABD;
+  background-color: #20a27f;
 }
 .sidebar-icon {
   width: 32px;
@@ -101,7 +102,7 @@ label.burger:hover {
   vertical-align: middle;
 }
 .sidebar ul li a.active {
-  background-color: #00bfff;
+  background-color: #44c1a4;
   color: white;
   border-radius: 5px;
 }
@@ -125,28 +126,8 @@ label.burger:hover {
 #hamburger:checked ~ .main-content #mood-list {
   margin-right: 10%;
 }
-@media (max-width: 1600px) {
-  .main-content {
-    margin-left: 10%;
-  }
-  #hamburger:checked ~ .main-content {
-    margin-left: 20%;
-  }
-}
 
-@media (max-width: 649px) {
-  label.burger {
-    display: block;
-    visibility: visible;
-  }
-  .main-content {
-    margin-left: 10%;
-  }
-  #hamburger:checked ~ .main-content {
-    filter: blur(4px);
-  }
-}
-/* Mood Tracking Specific Styles */
+/*############################## Mood Page Styles ##########################*/
 .left-side {
   width: 40%;
   padding: 20px;
@@ -184,7 +165,7 @@ label.burger:hover {
   flex-direction: column;
   margin-left: 8%;
   gap: 10px;
-  max-height: 650px; /* limit height */
+  max-height: 500px; /* limit height */
   overflow-y: auto; /* enable vertical scrolling */
 }
 /* Custom scrollbar for WebKit browsers */
@@ -285,18 +266,159 @@ display: flex;
 flex-direction: row;
 gap: 20px;
 }
-/* Chart Container */
 .chart-container {
-  width: 600px; 
+  width: 100%;
+  max-width: 600px; 
+  margin-top: 20px; /* reduce top space */
 }
-
 .chart-container canvas {
   width: 100%;
   height: 100%;
 }
-/*block for seek help section*/
+/* Block for seek help section */
 .graph_seek {
   display: flex;
- flex-direction: row;
- gap: 20px;
+  flex-direction: row;
+  gap: 20px;
+  margin-top: 10px; /* bring it closer to chart */
+}
+.seek {
+  margin-top: 20px;       /* reduce spacing from top */
+  padding: 10px;
+  max-width: 400px;       /* optional: keep it narrow */
+}
+
+.seek h1 {
+  color: #017d71;
+  font-size: 1.2rem;      /* smaller than before */
+  margin: 0 0 5px 0;      /* tighten spacing */
+}
+
+.seek h2 {
+  font-size: 1rem;        /* smaller subheader */
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.seek h3 {
+  font-size: 0.9rem;      /* smaller tertiary header */
+  margin: 10px 0 5px 0;
+  color: #017d71;
+}
+
+.seek p {
+  font-size: 0.85rem;     /* smaller paragraph text */
+  margin: 0 0 10px 0;
+  line-height: 1.2;
+  color: #555;
+}
+
+.seek ul {
+  font-size: 0.85rem;     /* smaller list items */
+  padding-left: 20px;
+  margin: 0 0 10px 0;
+}
+
+.seek ul li {
+  margin-bottom: 5px;
+}
+.graph_seek {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start; /* aligns top edges of headers */
+  gap: 20px;
+}
+.picture{
+  background-color:  #017d71;
+  text-align: center;
+  padding: 100px;
+  margin-left: 10px;
+}
+/*############################## Event Page Styles ##########################
+/* Search/filter section */
+.search-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #d2eae7;
+  box-sizing: border-box;
+  margin-left: 10px;
+}
+.search-container input,
+.search-container select {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.search-container button {
+  flex: 0;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 3px;
+  background-color: #017d71;
+  color: white;
+  cursor: pointer;
+}
+/* Event list */
+.events-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#eventList {
+  list-style: none;
+  padding: 0;
+  width: 80%;
+}
+/* Each event box */
+#eventList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  margin-bottom: 12px;
+  background-color: #f0f0f0;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#eventList li span {
+  flex: 1;
+  margin-right: 10px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+#eventList li button {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  background-color: #017d71;
+  color: white;
+  cursor: pointer;
+}
+/*############################## Login Page Styles ##########################*/
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.login form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 300px;
+  align-items: center;
 }

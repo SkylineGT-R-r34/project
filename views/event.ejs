@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body data-page="Events">
+  <%- include('navigationBar/navBar') %>
+
+  <div class="main-content">
+    <div class="picture">
+      <h1>Events</h1>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Search by title">
+      
+      <select id="type">
+        <option value="">All Types</option>
+        <option value="Workshop">Workshop</option>
+        <option value="Orientation">Orientation</option>
+        <option value="Talk_Show">Talk Show</option>
+        <option value="graduation">Graduation</option>
+      </select>
+
+      <select id="location">
+        <option value="">All Locations</option>
+        <option value="Library">Library  </option>
+        <option value="Main Hall">Main Hall</option>
+        <option value="Auditorium">Auditorium</option>
+        <option value="Stadium">Stadium</option>
+      </select>
+
+      <input type="date" id="date">
+
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <div class="events-container">
+      <ul id="eventList"></ul>
+    </div>
+  </div>
+
+  <script src="/Script.js"></script>
+</body>
+</html>

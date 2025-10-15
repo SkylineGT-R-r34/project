@@ -8,6 +8,6 @@
  * @returns {Promise<void>} - A promise that resolves when the rendering is complete.
  */
 export async function index(req, res, next) {
-    res.render('home', { title: 'Express' });
+    res.render('home', { title: 'CampusWell' });
 }
 

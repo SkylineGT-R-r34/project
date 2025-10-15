@@ -5,11 +5,39 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <%- include ('navigationBar/navBar') %>
     <div class="main-content">
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>  
-    <p>Example of how the page will be with new navbar</p>
+<div style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #017d71;
+  color: white;
+  text-align: center;
+  padding: 12px 0;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  z-index: 1000;
+">
+  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Home</a> |
+  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Mood Track</a> |
+  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Event</a> |
+  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Find Friend</a>
+
+  <!-- Login button top-right -->
+  <a href="/auth/login" style="
+    position: absolute;
+    top: 5px;
+    right: 100px;
+    background-color: #28a745;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+  ">Login</a>
+</div>
+<h1><%= title %></h1>
     </div>
   </body>
 </html>
