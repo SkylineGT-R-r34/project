@@ -6,60 +6,47 @@
   <label for="hamburger" class="burger-inside">&#9776;</label>
   <h2>CampusWell</h2>
   <ul>
-    <% if (role === 'student') { %>
-      <li>
-        <a href="/dashboard" class="<%= currentPath === '/' ? 'active' : '' %>">
-          <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="/moodTracking/moodTrackingPage" class="<%= currentPath === '/moodTracking/moodTrackingPage' ? 'active' : '' %>">
-          <img src="/image/mood.png" class="sidebar-icon"> Mood Tracker
-        </a>
-      </li>
-      <li>
-        <a href="/events/event" class="<%= currentPath === '/events/event' ? 'active' : '' %>">
-          <img src="/image/search.png" class="sidebar-icon"> Search & Discovery
-        </a>
-      </li>
-      <li>
-        <a href="/social/social" class="<%= currentPath === '/profile' ? 'active' : '' %>">
-          <img src="/image/social.png" class="sidebar-icon"> Social Networking
-        </a>
-      </li>
-      <li>
-        <a href="#" class="<%= currentPath === '/gamification' ? 'active' : '' %>">
-          <img src="/image/gamification.png" class="sidebar-icon"> Gamification
-        </a>
-      </li>
-      <li>
-        <a href="#" class="<%= currentPath === '/alerts' ? 'active' : '' %>">
-          <img src="/image/danger.png" class="sidebar-icon"> Alerts
-        </a>
-      </li>
-      <li>
-        <a href="/logout">
-          <img src="/image/exit.png" class="sidebar-icon"> Logout
-        </a>
-      </li>
-    <% } else if (role === 'staff') { %>
-      <li>
-        <a href="/dashboard" class="<%= currentPath === '/' ? 'active' : '' %>">
-          <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="#" class="<%= currentPath === '/alerts' ? 'active' : '' %>">
-          <img src="/image/danger.png" class="sidebar-icon"> Alerts
-        </a>
-      </li>
-      <li>
-        <a href="/logout">
-          <img src="/image/exit.png" class="sidebar-icon"> Logout
-        </a>
-      </li>
-    <% } %>
-  </ul>
+  <li>
+    <a href="/dashboard" class="<%= currentPath && currentPath.startsWith('/dashboard') ? 'active' : '' %>">
+      <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
+    </a>
+  </li>
+  <li>
+    <a href="/mood" class="<%= currentPath === '/mood' ? 'active' : '' %>">
+      <img src="/image/mood.png" class="sidebar-icon"> Mood Tracker
+    </a>
+  </li>
+  <li>
+    <a href="/resources" class="<%= currentPath === '/resources' ? 'active' : '' %>">
+      <img src="/image/search.png" class="sidebar-icon"> Search & Discovery
+    </a>
+  </li>
+  <li>
+    <a href="/profile" class="<%= currentPath === '/profile' ? 'active' : '' %>">
+      <img src="/image/social.png" class="sidebar-icon"> Social Networking
+    </a>
+  </li>
+  <li>
+    <a href="#" class="<%= currentPath === '/gamification' ? 'active' : '' %>">
+      <img src="/image/gamification.png" class="sidebar-icon"> Gamification
+    </a>
+  </li>
+  <li>
+    <a href="#" class="<%= currentPath === '/alerts' ? 'active' : '' %>">
+      <img src="/image/danger.png" class="sidebar-icon"> Alerts
+    </a>
+  </li>
+  <li>
+    <a href="/logout" class="<%= currentPath === '/profile' ? 'active' : '' %>">
+      <img src="/image/user.png" class="sidebar-icon"> Profile
+    </a>
+  </li>
+  <li>
+    <a href="/logout">
+      <img src="/image/exit.png" class="sidebar-icon"> Logout
+    </a>
+  </li>
+</ul>
 </nav>
 
 <script>

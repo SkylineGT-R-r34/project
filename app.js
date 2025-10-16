@@ -6,8 +6,8 @@ import { moodTrackingRouter } from './routes/moodTracking.js';
 import { eventRouter } from './routes/event.js';
 import { socialRouter } from './routes/social.js';
 import { authRouter } from './routes/auth.js';
-import cookieParser from 'cookie-parser';
-import { dash } from './routes/dashboard.js';
+import { dashboardRouter } from './routes/dashboard.js';
+
 // Setup debug module to spit out all messages
 // Do `npm start` to see the debug messages
 export const codeTrace = debug("comp3028:server");
@@ -35,11 +35,8 @@ app.use('/moodTracking', moodTrackingRouter);
 app.use('/events', eventRouter);
 app.use('/social', socialRouter);
 app.use('/auth', authRouter);
-app.use('/dashboard', dash); // CommonJS import
-app.get('/logout', (req, res) => {
-  res.clearCookie('token', { sameSite: 'Strict', secure: false });
-  res.redirect('/auth/login');
-});
+app.use('/dashboard', dashboardRouter);
+
 // Simple test route (for debugging)
 app.get("/test", (req, res) => {
   res.send("Test");

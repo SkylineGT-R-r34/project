@@ -1,162 +1,228 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.js';
-import pool from '../db/db.js'; // make sure pool is your pg Pool instance
-import { name } from 'ejs';
+import pool from '../db/db.js';
 
-export const dash = express.Router();
+export const dashboardRouter = express.Router();
 
-// ---------------- Dashboard Home ----------------
-dash.get('/', authenticateToken, (req, res) => {
-  res.render('dashboard', {
-    title: 'Dashboard',
-    name: req.user.name,
-    role: req.user.role,
-    currentPath: req.path,
-    user_id: req.user.id
+const parseDate = (value) => {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatDate = (date) => {
+  const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return utcDate.toISOString().split('T')[0];
+};
+
+const buildDashboardData = async ({ from: fromRaw, to: toRaw }) => {
+  const fromParam = parseDate(fromRaw);
+  const toParam = parseDate(toRaw);
+
+  const now = new Date();
+  const defaultTo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const toDate = toParam ?? defaultTo;
+  const defaultFrom = new Date(toDate);
+  defaultFrom.setUTCDate(defaultFrom.getUTCDate() - 13);
+  const fromDate = fromParam ?? defaultFrom;
+
+  if (fromDate > toDate) {
+    const error = new Error('Invalid date range: `from` must be before or equal to `to`.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const fromDateStr = formatDate(fromDate);
+  const toDateStr = formatDate(toDate);
+
+  const [hasMoodScoreResult, eventCategoryColumnResult] = await Promise.all([
+    pool.query(
+      `SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'mood_logs'
+          AND column_name = 'mood_score'
+      ) AS has_mood_score`
+    ),
+    pool.query(
+      `SELECT column_name
+       FROM information_schema.columns
+       WHERE table_name = 'events'
+         AND column_name IN ('category', 'type')
+       ORDER BY CASE WHEN column_name = 'category' THEN 0 ELSE 1 END
+       LIMIT 1`
+    ),
+  ]);
+
+  const hasMoodScore = Boolean(hasMoodScoreResult.rows[0]?.has_mood_score);
+  const availableEventCategoryColumn = eventCategoryColumnResult.rows[0]?.column_name;
+  const eventCategoryColumn = ['category', 'type'].includes(availableEventCategoryColumn)
+    ? availableEventCategoryColumn
+    : 'type';
+
+  const [
+    upcomingEventsCountResult,
+    eventsByCategoryTop5Result,
+    moodLogsTotalResult,
+    connectionsTotalResult,
+    moodTrendDailyResult,
+    eventsByCategoryResult,
+    upcomingEventsListResult,
+    recentMoodsResult,
+    recentConnectionsResult,
+  ] = await Promise.all([
+    pool.query(`SELECT COUNT(*) AS count FROM events WHERE event_date >= NOW()`),
+    pool.query(
+      `SELECT ${eventCategoryColumn} AS category, COUNT(*) AS count
+       FROM events
+       GROUP BY ${eventCategoryColumn}
+       ORDER BY count DESC
+       LIMIT 5`
+    ),
+    pool.query(
+      `SELECT COUNT(*) AS count
+       FROM mood_logs
+       WHERE created_at::date BETWEEN $1 AND $2`,
+      [fromDateStr, toDateStr]
+    ),
+    pool.query(`SELECT COUNT(*) AS count FROM connections`),
+    pool.query(
+      `SELECT TO_CHAR(created_at::date, 'YYYY-MM-DD') AS day, COUNT(*) AS count
+       FROM mood_logs
+       WHERE created_at::date BETWEEN $1 AND $2
+       GROUP BY day
+       ORDER BY day`,
+      [fromDateStr, toDateStr]
+    ),
+    pool.query(
+      `SELECT ${eventCategoryColumn} AS category, COUNT(*) AS count
+       FROM events
+       GROUP BY ${eventCategoryColumn}
+       ORDER BY count DESC`
+    ),
+    pool.query(
+      `SELECT id, title, ${eventCategoryColumn} AS category, event_date, event_time, location
+       FROM events
+       WHERE event_date >= NOW()
+       ORDER BY event_date ASC, event_time ASC
+       LIMIT 10`
+    ),
+    pool.query(
+      `SELECT *
+       FROM mood_logs
+       ORDER BY created_at DESC
+       LIMIT 10`
+    ),
+    pool.query(
+      `SELECT *
+       FROM connections
+       ORDER BY created_at DESC
+       LIMIT 10`
+    ),
+  ]);
+
+  const weeklyAvgMoodResult = hasMoodScore
+    ? await pool.query(
+        `SELECT TO_CHAR(date_trunc('week', created_at), 'IYYY-IW') AS week, AVG(mood_score)::numeric(10,2) AS avg_score
+         FROM mood_logs
+         WHERE created_at::date BETWEEN $1 AND $2
+         GROUP BY week
+         ORDER BY week`,
+        [fromDateStr, toDateStr]
+      )
+    : null;
+
+  return {
+    filters: {
+      from: fromDateStr,
+      to: toDateStr,
+    },
+    kpis: {
+      upcomingEvents: Number(upcomingEventsCountResult.rows[0]?.count ?? 0),
+      eventsByCategoryTop5: eventsByCategoryTop5Result.rows.map((row) => ({
+        category: row.category,
+        count: Number(row.count),
+      })),
+      moodLogsTotalInRange: Number(moodLogsTotalResult.rows[0]?.count ?? 0),
+      connectionsTotal: Number(connectionsTotalResult.rows[0]?.count ?? 0),
+      weeklyAvgMood: hasMoodScore
+        ? weeklyAvgMoodResult.rows.map((row) => ({
+            week: row.week,
+            avgScore: Number(row.avg_score),
+          }))
+        : null,
+    },
+    charts: {
+      moodTrendDaily: moodTrendDailyResult.rows.map((row) => ({
+        day: row.day,
+        count: Number(row.count),
+      })),
+      eventsByCategory: eventsByCategoryResult.rows.map((row) => ({
+        category: row.category,
+        count: Number(row.count),
+      })),
+    },
+    tables: {
+      upcomingEvents: upcomingEventsListResult.rows,
+      recentMoods: recentMoodsResult.rows,
+      recentConnections: recentConnectionsResult.rows,
+    },
+    meta: {
+      hasMoodScore,
+      notes: [
+        'Date filters default to the last 14 days when not provided.',
+        'Aggregated metrics derived from events, mood_logs, and connections tables.',
+        `Event category aggregations use the "${eventCategoryColumn}" column when available.`,
+      ],
+    },
+  };
+};
+
+const respondWithError = (res, error) => {
+  console.error('Error building dashboard metrics:', error);
+  const status = error.statusCode ?? 500;
+  res.status(status).json({
+    error: 'Unable to build dashboard metrics.',
+    details: error.message,
   });
-});
+};
 
-// ---------------- User Details ---------------- (all roles)
-dash.get('/userDetails', authenticateToken, async (req, res) => {
+dashboardRouter.get('/data', async (req, res) => {
   try {
-    const userRes = await pool.query(
-      'SELECT id, email, full_name, role FROM users WHERE id=$1',
-      [req.user.id]
-    );
-    const user = userRes.rows[0];
-    res.json({
-      user_id: user.id,
-      email: user.email,
-      name: user.full_name,
-      role: user.role
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Unable to fetch user details' });
+    const dashboard = await buildDashboardData(req.query);
+    res.json(dashboard);
+  } catch (error) {
+    respondWithError(res, error);
   }
 });
 
-// ---------------- Current Mood ---------------- (student only)
-dash.get('/currentMood', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'student') {
-    return res.status(403).json({ message: 'Only students can access current mood' });
-  }
-  try {
-    const moodRes = await pool.query(
-      'SELECT score, notes, created_at FROM mood_logs WHERE user_id=$1 ORDER BY created_at DESC LIMIT 1',
-      [req.user.id]
-    );
-    const mood = moodRes.rows[0];
-    res.json({
-      currentMood: mood ? { score: mood.score, notes: mood.notes } : { score: null, notes: null }
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Unable to fetch current mood' });
-  }
-});
-
-// ---------------- Recent Alert ---------------- (student only)
-dash.get('/recentAlert', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'student') {
-    return res.status(403).json({ message: 'Only students can access recent alerts' });
-  }
-  try {
-    const alertRes = await pool.query(
-      'SELECT message, type, created_at FROM notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 1',
-      [req.user.id]
-    );
-    const alert = alertRes.rows[0];
-    res.json({
-      recentAlert: alert || { message: 'No alerts', type: null }
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Unable to fetch recent alert' });
-  }
-});
-
-// ---------------- Alert Stats ---------------- (staff only)
-dash.get('/alertStats', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'staff') {
-    return res.status(403).json({ message: 'Only staff can access alert stats' });
-  }
-  try {
-    // Example: count notifications of type 'help' grouped by students
-    const statsRes = await pool.query(
-      `SELECT user_id, COUNT(*) AS help_count 
-       FROM notifications 
-       WHERE type='help' 
-       GROUP BY user_id`
-    );
-    res.json({
-      alertStats: statsRes.rows
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Unable to fetch alert stats' });
-  }
-});
-
-// ---------------- Staff Details ---------------- (staff/admin only)
-dash.get('/staffDetails', authenticateToken, async (req, res) => {
-  if (!['staff', 'admin'].includes(req.user.role)) {
-    return res.status(403).json({ message: 'Access denied' });
-  }
-  try {
-    const staffRes = await pool.query(
-      'SELECT id, full_name, email FROM users WHERE role IN ($1, $2)',
-      ['staff', 'admin']
-    );
-    res.json({
-      staffDetails: staffRes.rows
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Unable to fetch staff details' });
-  }
-});
-
-// ---------------- Event Bookings ---------------- (staff/admin only)
-dash.get('/eventBookings', authenticateToken, async (req, res) => {
-  if (!['staff', 'admin'].includes(req.user.role)) {
-    return res.status(403).json({ message: 'Access denied' });
-  }
-  try {
-    const bookingsRes = await pool.query(
-      `SELECT b.id AS booking_id, u.full_name AS student_name, e.title AS event_title, b.status
-       FROM bookings b
-       JOIN users u ON b.user_id = u.id
-       JOIN events e ON b.event_id = e.id`
-    );
-    res.json({
-      eventBookings: bookingsRes.rows
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Unable to fetch event bookings' });
-  }
-});
-//--student own booking 
-dash.get('/myBookings', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'student') {
-    return res.status(403).json({ message: 'Only students can access their bookings' });
-  }
+dashboardRouter.get('/', async (req, res) => {
+  const wantsJson = req.query.format === 'json' || req.accepts(['html', 'json']) === 'json';
 
   try {
-    const bookingsRes = await pool.query(
-      `SELECT e.id AS event_id, e.title, e.type, e.location, e.event_date, e.event_time, b.status
-       FROM bookings b
-       JOIN events e ON b.event_id = e.id
-       WHERE b.user_id = $1`,
-      [req.user.id]
-    );
+    const dashboard = await buildDashboardData(req.query);
 
-    res.json({
-      bookedEvents: bookingsRes.rows
+    if (wantsJson) {
+      return res.json(dashboard);
+    }
+
+    res.render('dashboard/index', {
+      title: 'Wellness Dashboard',
+      dashboard,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Unable to fetch your booked events' });
+  } catch (error) {
+    if (wantsJson) {
+      return respondWithError(res, error);
+    }
+
+    console.error('Error rendering dashboard UI:', error);
+    res.status(error.statusCode ?? 500).render('error', {
+      title: 'Dashboard Error',
+      message: 'Unable to load dashboard metrics.',
+      error,
+    });
   }
 });
+
+export { buildDashboardData };
