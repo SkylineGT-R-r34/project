@@ -8,7 +8,7 @@
   <h2>CampusWell</h2>
   <ul>
   <li>
-    <a href="/dashboard" class="<%= currentPath === '/' ? 'active' : '' %>">
+    <a href="/dashboard" class="<%= currentPath && currentPath.startsWith('/dashboard') ? 'active' : '' %>">
       <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
     </a>
   </li>

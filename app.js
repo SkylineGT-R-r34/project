@@ -6,6 +6,7 @@ import { moodTrackingRouter } from './routes/moodTracking.js';
 import { eventRouter } from './routes/event.js';
 import { socialRouter } from './routes/social.js';
 import { authRouter } from './routes/auth.js';
+import { dashboardRouter } from './routes/dashboard.js';
 
 // Setup debug module to spit out all messages
 // Do `npm start` to see the debug messages
@@ -32,6 +33,7 @@ app.use('/moodTracking', moodTrackingRouter);
 app.use('/events', eventRouter);
 app.use('/social', socialRouter);
 app.use('/auth', authRouter);
+app.use('/dashboard', dashboardRouter);
 
 // Simple test route (for debugging)
 app.get("/test", (req, res) => {
