@@ -19,6 +19,8 @@ server.setup(app);
 // Register middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+//cookie parser
+app.use(cookieParser());
 app.set("view engine", "ejs");
 
 // Track current path for active highlighting in nav bar

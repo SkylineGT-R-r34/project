@@ -1,7 +1,6 @@
-<!-- open button -->
- 
 <input class="burgerBox" type="checkbox" id="hamburger">
 <label for="hamburger" class="burger">&#9776;</label>
+
 <nav class="sidebar">
   <!-- close button inside sidebar -->
   <label for="hamburger" class="burger-inside">&#9776;</label>
@@ -49,12 +48,12 @@
   </li>
 </ul>
 </nav>
+
 <script>
-  //Make the navbar responsive to window size (<650)
+  // Make the navbar responsive to window size (<650)
   const hamburger = document.getElementById('hamburger');
   function handleResize() {
     if (window.innerWidth < 650) {
-      // Force sidebar closed
       hamburger.checked = false;
     }
   }

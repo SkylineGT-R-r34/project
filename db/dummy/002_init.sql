@@ -1,7 +1,7 @@
 -- Users
 INSERT INTO users (email, password, full_name, role)
 VALUES 
-('student1@university.edu', 'password123', 'Alice Nguyen', 'student'),
+('student1@university.edu', '$2b$10$JXjUd/TOlxQ6vy7cSgqZEO3u5jNd8su0pOivZbWJpPzuw6f09SSvC', 'Alice Nguyen', 'student'),
 ('student2@university.edu', 'password123', 'Bob Tran', 'student');
 
 -- Events
