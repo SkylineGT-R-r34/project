@@ -1,59 +1,24 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      background-color: #017d71;
-    }
-    </style>
-  </head>
-  <body>
-
-<div class="login">
-  <h1 style="color: aliceblue;">Login</h1>
-<form id="loginForm">
-  <input style="padding: 10px;border-radius: 10px;" type="email" id="email" placeholder="Email" required />
-  <input style="padding: 10px;border-radius: 10px;" type="password" id="password" placeholder="Password" required />
-  <p>Forgot Password ?<a href="/auth/reset_password">Click here</a></p>
-  <p>Don't have account ? <a href="/auth/register">Register</a></p>
-  <button style="background-color: #017d71;color: aliceblue;cursor: pointer;padding: 10px;border-radius: 10px;width: 100px;" type="submit">Login</button>
-</form>
-
-</div>
-
-
-<script>
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-
-  try {
-    const res = await fetch('/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // ✅ sends/receives cookies
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) return alert(data.message || 'Login failed');
-    
-    // ✅ Cookies are already stored, just redirect
-    localStorage.setItem('user', JSON.stringify(data.user));
-    window.location.href = '/dashboard';
-  } catch (err) {
-    console.error(err);
-    alert('Network error');
-  }
-});
-</script>
-
-  </body>
-</html>
+<%
+  const body = () => { %>
+    <section class="page-section auth-page">
+      <div class="login">
+        <%- include('partials/pageHeader', { title: 'Login', subtitle: 'Access your CampusWell dashboard with your campus email.' }) %>
+        <form id="loginForm" data-validate>
+          <div class="form-field">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" name="email" class="form-control" required placeholder="you@example.com" />
+          </div>
+          <div class="form-field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" class="form-control" required minlength="6" placeholder="Password" />
+          </div>
+          <div class="auth-links">
+            <a href="/auth/reset_password">Forgot your password?</a>
+            <span>Don't have an account? <a href="/auth/register">Register</a></span>
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+    </section>
+  <% }; %>
+<%- include('layouts/layout') %>

@@ -5,11 +5,14 @@ export const eventRouter = express.Router();
 // Render events page
 
 eventRouter.get('/event',authenticateToken,(req, res) => {
-  const role = req.user?.role || 'student'; 
+  const role = req.user?.role || 'student';
+  const resolvedPath = req.baseUrl
+    ? `${req.baseUrl}${req.path === '/' ? '' : req.path}`
+    : req.path;
   res.render('event', {
     title: 'Events',
-    role: req.user.role,      
-    currentPath: req.path,
+    role: req.user.role,
+    currentPath: resolvedPath,
     user_id: req.user.id
   });
 });
@@ -80,5 +83,46 @@ eventRouter.post("/book/:id",authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error while booking event' });
+  }
+});
+
+eventRouter.put('/:id', authenticateToken, async (req, res) => {
+  const eventId = req.params.id;
+  const { title, description, evDate, evTime, location, type, capacity } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE events
+       SET title = $1,
+           description = $2,
+           event_date = $3,
+           event_time = $4,
+           location = $5,
+           type = $6,
+           capacity = $7
+       WHERE id = $8
+       RETURNING *`,
+      [title, description, evDate, evTime, location, type, capacity, eventId]
+    );
+    if (!result.rowCount) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Update event error:', error);
+    res.status(500).json({ message: 'Unable to update event' });
+  }
+});
+
+eventRouter.delete('/:id', authenticateToken, async (req, res) => {
+  const eventId = req.params.id;
+  try {
+    const result = await pool.query('DELETE FROM events WHERE id = $1 RETURNING id', [eventId]);
+    if (!result.rowCount) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    res.json({ message: 'Event deleted' });
+  } catch (error) {
+    console.error('Delete event error:', error);
+    res.status(500).json({ message: 'Unable to delete event' });
   }
 });

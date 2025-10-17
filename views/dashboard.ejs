@@ -1,49 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <title>
-    <%= title %>
-  </title>
-  <link rel="stylesheet" href="/stylesheets/style.css">
-  <style>
-    section {
-      margin-bottom: 30px;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 5px 10px;
-      margin-top: 5px;
-      cursor: pointer;
-    }
-
-    input,
-    select {
-      margin-bottom: 10px;
-      padding: 5px;
-      width: 200px;
-    }
-    label {
-      display: block;
-    }
-  </style>
-</head>
-
-<body>
-  <%- include('navigationBar/navBar') %>
-    <div class="main-content">
-      <h1>Welcome, <%= name %> (<%= role %>)</h1>
-    </div>
-</body>
-</html>
+<%
+  const displayName = (user && (user.full_name || user.name)) || name || 'Friend';
+  const userRole = (user && user.role) || role || 'student';
+  const statsSource = typeof stats !== 'undefined' ? stats : (typeof dashboard !== 'undefined' ? dashboard : {});
+  const quickStats = [
+    { label: 'Upcoming events', value: statsSource.upcomingEvents ?? 0 },
+    { label: 'Mood logs this week', value: statsSource.moodEntries ?? 0 },
+    { label: 'Active connections', value: statsSource.connections ?? 0 }
+  ];
+  const cards = [
+    { title: 'Events', text: 'Browse and book upcoming happenings across campus.', href: '/events/event' },
+    { title: 'Mood tracker', text: 'Log how you are feeling and spot trends over time.', href: '/moodTracking/moodTrackingPage' },
+    { title: 'Social hub', text: 'Connect with classmates and grow your support circle.', href: '/social' },
+    { title: 'Profile & settings', text: 'Manage your preferences and notification settings.', href: '/profile' }
+  ];
+  const body = () => { %>
+    <section class="page-section">
+      <%- include('partials/pageHeader', { title: `Welcome, ${displayName}`, subtitle: `You are signed in as ${userRole}.` }) %>
+      <div class="stats-grid">
+        <% quickStats.forEach(item => { %>
+          <div class="stat-card">
+            <p class="stat-card__label"><%= item.label %></p>
+            <p class="stat-card__value"><%= item.value %></p>
+          </div>
+        <% }) %>
+      </div>
+      <div class="card-grid">
+        <% cards.forEach(card => { %>
+          <a href="<%= card.href %>" class="card link-card">
+            <h2 class="card__title"><%= card.title %></h2>
+            <p class="card__text"><%= card.text %></p>
+            <span class="link-card__cta">Open <span aria-hidden="true">→</span></span>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  <% }; %>
+<%- include('layouts/layout') %>

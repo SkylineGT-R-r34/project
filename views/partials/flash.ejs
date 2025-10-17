@@ -1,0 +1,24 @@
+<%
+  const flashData =
+    (typeof flash !== 'undefined' && flash) ||
+    (typeof locals !== 'undefined' ? locals.flash : undefined);
+%>
+<% if (flashData && (flashData.success || flashData.error || flashData.info)) { %>
+  <div class="flash-wrapper" data-flash-wrapper>
+    <% if (flashData.success) { %>
+      <div class="flash-message flash-success" role="status" aria-live="polite">
+        <strong>Success:</strong> <%= flashData.success %>
+      </div>
+    <% } %>
+    <% if (flashData.info) { %>
+      <div class="flash-message flash-info" role="status" aria-live="polite">
+        <strong>Note:</strong> <%= flashData.info %>
+      </div>
+    <% } %>
+    <% if (flashData.error) { %>
+      <div class="flash-message flash-error" role="alert">
+        <strong>Error:</strong> <%= flashData.error %>
+      </div>
+    <% } %>
+  </div>
+<% } %>

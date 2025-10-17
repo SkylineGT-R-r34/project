@@ -1,9 +1,27 @@
-    import express from 'express';
-    import pool from '../db/db.js';
+import express from 'express';
+import pool from '../db/db.js';
+import { authenticateToken } from '../middleware/auth.js';
 
-    export const dashboardRouter = express.Router();
+export const dashboardRouter = express.Router();
 
-    dashboardRouter.get('/', async (req, res) => {
+    dashboardRouter.get('/', authenticateToken, async (req, res) => {
+    const forcedJson = typeof req.query.format === 'string' && req.query.format.toLowerCase() === 'json';
+    const accepted = req.accepts(['html', 'json']);
+    const wantsJson = forcedJson || accepted === 'json' || req.xhr;
+
+    if (!wantsJson) {
+        const resolvedPath = req.baseUrl
+        ? `${req.baseUrl}${req.path === '/' ? '' : req.path}`
+        : req.path;
+
+        return res.render('dashboard', {
+        title: 'Dashboard',
+        user: req.user,
+        role: req.user?.role,
+        currentPath: resolvedPath
+        });
+    }
+
     const parseDate = (value) => {
         if (!value) {
         return null;

@@ -1,9 +1,47 @@
 import express from "express";
 import pool from "../db/db.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 export const socialRouter = express.Router();
 
+socialRouter.get("/", authenticateToken, (req, res) => {
+  const resolvedPath = req.baseUrl
+    ? `${req.baseUrl}${req.path === '/' ? '' : req.path}`
+    : req.path;
+
+  res.render("social", {
+    title: "Social hub",
+    user: req.user,
+    currentPath: resolvedPath,
+    results: [],
+    requests: { incoming: [], outgoing: [] },
+    connections: []
+  });
+});
+
 // ==================== POSTS ENDPOINTS ====================
+
+socialRouter.get('/people', authenticateToken, async (req, res) => {
+  const searchTerm = (req.query.q || '').toString().trim();
+  if (searchTerm.length < 2) {
+    return res.json([]);
+  }
+  try {
+    const result = await pool.query(
+      `SELECT id, full_name, email
+       FROM users
+       WHERE id <> $1
+         AND (full_name ILIKE $2 OR email ILIKE $2)
+       ORDER BY full_name ASC
+       LIMIT 20`,
+      [req.user.id, `%${searchTerm}%`]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('People search error:', error);
+    res.status(500).json({ message: 'Unable to search people' });
+  }
+});
 
 // GET /posts - Get all posts (with optional user filter)
 socialRouter.get("/posts", async (req, res) => {

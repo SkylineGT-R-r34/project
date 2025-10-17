@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title || 'CampusWell' %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+  <body
+    class="app-body"
+    data-current-path="<%= (typeof currentPath !== 'undefined' ? currentPath : (typeof locals !== 'undefined' ? locals.currentPath : '')) || '' %>"
+    data-user-role="<%= (typeof role !== 'undefined' ? role : (user && user.role)) || '' %>"
+  >
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <%- include('../navigationBar/navBar') %>
+    <div class="app-shell">
+      <%- include('../partials/flash') %>
+      <main id="main-content" class="main-content">
+        <% if (typeof body === 'function') { %>
+          <% body(); %>
+        <% } else if (typeof body !== 'undefined') { %>
+          <%- body %>
+        <% } %>
+      </main>
+    </div>
+    <footer class="site-footer">
+      &copy; <%= new Date().getFullYear() %> CampusWell. All rights reserved.
+    </footer>
+    <script src="/Script.js" defer></script>
+  </body>
+</html>
