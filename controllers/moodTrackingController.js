@@ -11,11 +11,13 @@ export const index = async (req, res) => {
       [user.id]
     );
 
+    const currentPath = (`${req.baseUrl || ''}${req.path || ''}`).replace(/\/+$/, '') || '/';
+
     res.render('moodTrackingUI', {
       title: 'Mood Tracking Page',
       user,
       moods: moodsResult.rows,
-      currentPath: req.path,
+      currentPath,
       role: user.role  // pass role to EJS
     });
   } catch (err) {
