@@ -6,80 +6,80 @@
   const connectionList = Array.isArray(connections) ? connections : [];
   const currentUserId = user ? user.id : '';
   const body = () => { %>
-    <section style="display:flex;flex-direction:column;gap:24px;">
+    <section class="page-section">
       <%- include('partials/pageHeader', { title: 'Social hub', subtitle: 'Find classmates, respond to requests, and keep conversations going.' }) %>
-      <div id="social-page" data-user-id="<%= currentUserId %>" style="display:flex;flex-direction:column;gap:24px;">
-        <div style="background:#ffffff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
-          <h2 style="margin:0;color:#013d37;font-size:1.3rem;">Find people</h2>
-          <p style="margin:0;color:#4a4a4a;">Search for students or staff by name or email to connect.</p>
-          <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-            Search
-            <input type="search" id="social-search" placeholder="Search by name or email" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+      <div id="social-page" data-user-id="<%= currentUserId %>" class="social-grid">
+        <div class="social-panel">
+          <h2 class="card__title">Find people</h2>
+          <p class="card__text">Search for students or staff by name or email to connect.</p>
+          <label class="form-field" for="social-search">
+            <span>Search</span>
+            <input type="search" id="social-search" class="form-control" placeholder="Search by name or email" />
           </label>
-          <ul id="social-results" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;">
+          <ul id="social-results" class="social-list">
             <% if (!searchResults.length) { %>
-              <li id="social-results-empty" style="background:rgba(1,125,113,0.06);padding:16px;border-radius:12px;color:#4a4a4a;">Start typing to find people.</li>
+              <li id="social-results-empty" class="social-empty">Start typing to find people.</li>
             <% } %>
             <% searchResults.forEach(person => { %>
-              <li data-user-id="<%= person.id %>" style="background:#ffffff;border:1px solid rgba(1,125,113,0.18);box-shadow:0 8px 22px rgba(0,0,0,0.08);padding:16px 18px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+              <li data-user-id="<%= person.id %>" class="social-item social-item--inline">
                 <div>
-                  <p style="margin:0;font-weight:600;color:#013d37;"> <%= person.full_name || person.name || 'Unknown user' %> </p>
-                  <p style="margin:4px 0 0;color:#4a4a4a;font-size:0.9rem;"> <%= person.email %> </p>
+                  <p class="card__text card__text--emphasis"><%= person.full_name || person.name || 'Unknown user' %></p>
+                  <p class="social-note"><%= person.email %></p>
                 </div>
-                <button class="social-add" data-target-id="<%= person.id %>" type="button" style="background:#017d71;color:#ffffff;border:none;padding:8px 14px;border-radius:16px;font-weight:600;">Add</button>
+                <button class="btn btn-primary social-add" data-target-id="<%= person.id %>" type="button">Add</button>
               </li>
             <% }) %>
           </ul>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">
-          <div style="flex:1 1 320px;min-width:280px;background:#ffffff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:16px;">
-            <h2 style="margin:0;color:#013d37;font-size:1.2rem;">Incoming requests</h2>
-            <ul id="social-incoming" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;">
+        <div class="social-panels">
+          <div class="social-panel">
+            <h2 class="card__title">Incoming requests</h2>
+            <ul id="social-incoming" class="social-list">
               <% if (!incomingRequests.length) { %>
-                <li class="social-empty" style="background:rgba(1,125,113,0.06);padding:16px;border-radius:12px;color:#4a4a4a;">No pending requests.</li>
+                <li class="social-empty">No pending requests.</li>
               <% } %>
               <% incomingRequests.forEach(req => { %>
-                <li data-connection-id="<%= req.connection_id || req.id %>" style="background:#ffffff;border:1px solid rgba(1,125,113,0.18);box-shadow:0 8px 22px rgba(0,0,0,0.08);padding:16px 18px;border-radius:14px;display:flex;flex-direction:column;gap:8px;">
+                <li data-connection-id="<%= req.connection_id || req.id %>" class="social-item">
                   <div>
-                    <p style="margin:0;font-weight:600;color:#013d37;"> <%= req.requester_name || req.full_name || 'Unknown user' %> </p>
-                    <p style="margin:4px 0 0;color:#4a4a4a;font-size:0.9rem;"> <%= req.requester_email || req.email %> </p>
+                    <p class="card__text card__text--emphasis"><%= req.requester_name || req.full_name || 'Unknown user' %></p>
+                    <p class="social-note"><%= req.requester_email || req.email %></p>
                   </div>
-                  <div style="display:flex;gap:12px;">
-                    <button class="social-accept" data-action="accept" data-connection-id="<%= req.connection_id || req.id %>" type="button" style="background:#017d71;color:#ffffff;border:none;padding:8px 14px;border-radius:16px;font-weight:600;">Accept</button>
-                    <button class="social-reject" data-action="reject" data-connection-id="<%= req.connection_id || req.id %>" type="button" style="background:transparent;color:#b02a37;border:1px solid rgba(176,42,55,0.4);padding:8px 14px;border-radius:16px;font-weight:600;">Reject</button>
+                  <div class="social-actions">
+                    <button class="btn btn-primary social-accept" data-action="accept" data-connection-id="<%= req.connection_id || req.id %>" type="button">Accept</button>
+                    <button class="btn btn-outline social-reject" data-action="reject" data-connection-id="<%= req.connection_id || req.id %>" type="button">Reject</button>
                   </div>
                 </li>
               <% }) %>
             </ul>
           </div>
-          <div style="flex:1 1 320px;min-width:280px;background:#ffffff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:16px;">
-            <h2 style="margin:0;color:#013d37;font-size:1.2rem;">Outgoing requests</h2>
-            <ul id="social-outgoing" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;">
+          <div class="social-panel">
+            <h2 class="card__title">Outgoing requests</h2>
+            <ul id="social-outgoing" class="social-list">
               <% if (!outgoingRequests.length) { %>
-                <li class="social-empty" style="background:rgba(1,125,113,0.06);padding:16px;border-radius:12px;color:#4a4a4a;">No outgoing requests.</li>
+                <li class="social-empty">No outgoing requests.</li>
               <% } %>
               <% outgoingRequests.forEach(req => { %>
-                <li data-connection-id="<%= req.connection_id || req.id %>" style="background:#ffffff;border:1px solid rgba(1,125,113,0.18);box-shadow:0 8px 22px rgba(0,0,0,0.08);padding:16px 18px;border-radius:14px;display:flex;flex-direction:column;gap:6px;">
-                  <p style="margin:0;font-weight:600;color:#013d37;"> <%= req.recipient_name || req.full_name || req.friend_name || 'Pending user' %> </p>
-                  <p style="margin:4px 0 0;color:#4a4a4a;font-size:0.9rem;">Status: <%= req.status || 'pending' %></p>
+                <li data-connection-id="<%= req.connection_id || req.id %>" class="social-item">
+                  <p class="card__text card__text--emphasis"><%= req.recipient_name || req.full_name || req.friend_name || 'Pending user' %></p>
+                  <p class="social-note">Status: <%= req.status || 'pending' %></p>
                 </li>
               <% }) %>
             </ul>
           </div>
         </div>
-        <div style="background:#ffffff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:16px;">
-          <h2 style="margin:0;color:#013d37;font-size:1.3rem;">Connections</h2>
-          <ul id="social-connections" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;">
+        <div class="social-panel">
+          <h2 class="card__title">Connections</h2>
+          <ul id="social-connections" class="social-list">
             <% if (!connectionList.length) { %>
-              <li class="social-empty" style="background:rgba(1,125,113,0.06);padding:16px;border-radius:12px;color:#4a4a4a;">You have no connections yet.</li>
+              <li class="social-empty">You have no connections yet.</li>
             <% } %>
             <% connectionList.forEach(conn => { %>
-              <li data-connection-id="<%= conn.connection_id || conn.id %>" style="background:#ffffff;border:1px solid rgba(1,125,113,0.18);box-shadow:0 8px 22px rgba(0,0,0,0.08);padding:16px 18px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+              <li data-connection-id="<%= conn.connection_id || conn.id %>" class="social-item social-item--inline">
                 <div>
-                  <p style="margin:0;font-weight:600;color:#013d37;"> <%= conn.friend_name || conn.full_name || 'Connection' %> </p>
-                  <p style="margin:4px 0 0;color:#4a4a4a;font-size:0.9rem;">Connected since: <%= conn.connected_at ? new Date(conn.connected_at).toLocaleDateString() : 'Pending' %></p>
+                  <p class="card__text card__text--emphasis"><%= conn.friend_name || conn.full_name || 'Connection' %></p>
+                  <p class="social-note">Connected since: <%= conn.connected_at ? new Date(conn.connected_at).toLocaleDateString() : 'Pending' %></p>
                 </div>
-                <button type="button" class="social-message" style="background:#017d71;color:#ffffff;border:none;padding:8px 14px;border-radius:16px;font-weight:600;">Message</button>
+                <button type="button" class="btn btn-primary social-message">Message</button>
               </li>
             <% }) %>
           </ul>

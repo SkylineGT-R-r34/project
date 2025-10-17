@@ -1,15 +1,15 @@
 <%
   const isDev = error && error.stack;
   const body = () => { %>
-    <section style="display:flex;flex-direction:column;gap:24px;max-width:720px;margin:0 auto;">
+    <section class="page-section page-section--narrow">
       <%- include('partials/pageHeader', { title: message || 'Something went wrong', subtitle: 'We hit an unexpected snag while processing your request.' }) %>
-      <div style="background:#ffffff;padding:28px 26px;border-radius:18px;box-shadow:0 12px 32px rgba(0,0,0,0.12);display:flex;flex-direction:column;gap:14px;">
-        <p style="margin:0;color:#4a4a4a;">Status code: <strong><%= error && error.status ? error.status : 500 %></strong></p>
-        <p style="margin:0;color:#4a4a4a;">You can head back to the <a href="/" style="color:#017d71;">home page</a> or try the action again shortly.</p>
+      <div class="card card--spacious">
+        <p class="card__text">Status code: <strong><%= error && error.status ? error.status : 500 %></strong></p>
+        <p class="card__text">You can head back to the <a href="/">home page</a> or try the action again shortly.</p>
         <% if (isDev) { %>
-          <details style="background:rgba(1,125,113,0.07);padding:16px;border-radius:12px;">
-            <summary style="font-weight:600;color:#013d37;cursor:pointer;">Developer details</summary>
-            <pre style="overflow:auto;white-space:pre-wrap;font-size:0.85rem;color:#333;margin-top:12px;"><%= error.stack %></pre>
+          <details class="dev-details">
+            <summary>Developer details</summary>
+            <pre><%= error.stack %></pre>
           </details>
         <% } %>
       </div>

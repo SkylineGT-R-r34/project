@@ -20,19 +20,19 @@
     }
   ];
   const body = () => { %>
-    <section style="display:flex;flex-direction:column;gap:32px;">
+    <section class="page-section">
       <%- include('partials/pageHeader', { title: title || 'CampusWell', subtitle: 'Your campus wellbeing companion in one friendly hub.' }) %>
-      <div style="background:#ffffff;border-radius:18px;box-shadow:0 12px 32px rgba(0,0,0,0.12);padding:32px 28px;display:flex;flex-direction:column;gap:18px;">
-        <p style="margin:0;color:#333;font-size:1rem;line-height:1.6;">
+      <div class="card">
+        <p class="social-note">
           CampusWell helps you stay grounded with simple tools for logging moods, signing up for events, and keeping in touch with your support circle.
         </p>
-        <div style="display:flex;flex-wrap:wrap;gap:18px;">
+        <div class="card-grid">
           <% featureCards.forEach(card => { %>
-            <div style="flex:1 1 220px;background:rgba(1,125,113,0.06);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:220px;">
-              <h2 style="margin:0;color:#013d37;font-size:1.2rem;"> <%= card.title %> </h2>
-              <p style="margin:0;color:#4a4a4a;font-size:0.95rem;line-height:1.5;"> <%= card.text %> </p>
-              <a href="<%= card.href %>" style="align-self:flex-start;padding:8px 16px;background-color:#017d71;color:#ffffff;border-radius:18px;font-size:0.9rem;"> <%= card.label %> </a>
-            </div>
+            <article class="card">
+              <h2 class="card__title"><%= card.title %></h2>
+              <p class="card__text"><%= card.text %></p>
+              <a href="<%= card.href %>" class="btn btn-primary"> <%= card.label %> </a>
+            </article>
           <% }) %>
         </div>
       </div>

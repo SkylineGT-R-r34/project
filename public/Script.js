@@ -1,18 +1,16 @@
 //######################################## Main Script ########################################
 document.addEventListener('DOMContentLoaded', () => {
+  const body = document.body;
+  const currentPath = body?.dataset?.currentPath || '';
   const main = document.getElementById('main-content');
 
   // -------------------- Flash helpers --------------------
-  function ensureFlashContainer() {
-    let container = document.querySelector('.flash-wrapper');
+  const ensureFlashContainer = () => {
+    let container = document.querySelector('[data-flash-wrapper]');
     if (!container) {
       container = document.createElement('div');
       container.className = 'flash-wrapper';
-      container.style.maxWidth = '640px';
-      container.style.margin = '20px auto 0';
-      container.style.display = 'flex';
-      container.style.flexDirection = 'column';
-      container.style.gap = '12px';
+      container.setAttribute('data-flash-wrapper', '');
       if (main) {
         main.prepend(container);
       } else {
@@ -20,44 +18,33 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     return container;
-  }
+  };
 
-  function pushFlash(type, message) {
+  const showFlash = (type, message, { duration = 5000 } = {}) => {
     if (!message) return;
     const container = ensureFlashContainer();
     const flash = document.createElement('div');
     flash.className = `flash-message flash-${type}`;
-    flash.style.background = '#ffffff';
-    flash.style.borderRadius = '12px';
-    flash.style.padding = '16px 18px';
-    flash.style.boxShadow = '0 4px 10px rgba(0,0,0,0.05)';
-    flash.style.border = type === 'error' ? '1px solid rgba(180,44,44,0.35)' : '1px solid rgba(1,125,113,0.3)';
-    flash.style.color = type === 'error' ? '#742323' : '#013d37';
-    flash.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    flash.role = type === 'error' ? 'alert' : 'status';
     flash.textContent = message;
-    container.append(flash);
-    setTimeout(() => flash.remove(), 6000);
-  }
+    container.appendChild(flash);
+    if (duration) {
+      window.setTimeout(() => flash.remove(), duration);
+    }
+  };
 
   // -------------------- Navigation active state --------------------
-  const currentPath = window.location.pathname;
-  document.querySelectorAll('[data-path]').forEach(link => {
-    const targetPath = link.getAttribute('data-path') || link.getAttribute('href');
-    if (!targetPath) return;
-    const isMatch =
-      currentPath === targetPath ||
-      (targetPath !== '/' && currentPath.startsWith(targetPath)) ||
-      (targetPath !== '/' && currentPath.endsWith(targetPath));
-    if (isMatch) {
+  document.querySelectorAll('[data-nav-match]').forEach(link => {
+    const match = link.getAttribute('data-nav-match');
+    if (!match) return;
+    if (currentPath === match || (match !== '/' && currentPath.startsWith(match))) {
       link.classList.add('active');
       link.setAttribute('aria-current', 'page');
-      link.style.borderBottom = '2px solid #ffffff';
     }
   });
 
   // -------------------- Form validation helpers --------------------
-  const forms = document.querySelectorAll('form[data-validate]');
-  forms.forEach(form => {
+  document.querySelectorAll('form[data-validate]').forEach(form => {
     form.addEventListener('invalid', event => {
       const field = event.target;
       if (!(field instanceof HTMLElement)) return;
@@ -67,10 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!errorEl) {
         errorEl = document.createElement('span');
         errorEl.id = errorId;
-        errorEl.style.color = '#b02a37';
-        errorEl.style.fontSize = '0.8rem';
-        errorEl.style.marginTop = '4px';
-        errorEl.style.display = 'block';
+        errorEl.className = 'form-error';
         field.insertAdjacentElement('afterend', errorEl);
       }
       errorEl.textContent = field.validationMessage;
@@ -92,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // -------------------- Login form --------------------
+  // -------------------- Auth forms --------------------
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', async event => {
@@ -110,21 +94,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          pushFlash('error', data.message || 'Login failed.');
+          showFlash('error', data.message || 'Login failed.');
           return;
         }
         if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
+          window.localStorage.setItem('user', JSON.stringify(data.user));
         }
         window.location.href = '/dashboard';
       } catch (error) {
         console.error('Login error:', error);
-        pushFlash('error', 'Unable to login right now. Please try again.');
+        showFlash('error', 'Unable to login right now. Please try again.');
       }
     });
   }
 
-  // -------------------- Register form --------------------
   const registerForm = document.getElementById('registerForm');
   if (registerForm) {
     registerForm.addEventListener('submit', async event => {
@@ -143,112 +126,97 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          pushFlash('error', data.message || 'Registration failed.');
+          showFlash('error', data.message || 'Registration failed.');
           return;
         }
-        pushFlash('success', 'Registration successful! You can login now.');
-        setTimeout(() => {
+        showFlash('success', 'Registration successful! You can login now.');
+        window.setTimeout(() => {
           window.location.href = '/auth/login';
         }, 800);
       } catch (error) {
         console.error('Register error:', error);
-        pushFlash('error', 'Unable to register right now. Please try again.');
+        showFlash('error', 'Unable to register right now. Please try again.');
       }
     });
   }
 
+  const resetForm = document.getElementById('resetPasswordForm');
+  if (resetForm) {
+    resetForm.addEventListener('submit', () => {
+      showFlash('info', 'If the account exists you will receive an email shortly.');
+    });
+  }
+
   // -------------------- Events page --------------------
-  const eventsRoot = document.getElementById('events-page');
-  if (eventsRoot) {
-    const userId = eventsRoot.getAttribute('data-user-id');
-    const listEl = document.getElementById('event-list');
-    const emptyState = document.getElementById('event-empty');
+  const initEventsPage = () => {
+    const page = document.getElementById('events-page');
+    if (!page) return;
+    const userId = page.getAttribute('data-user-id');
+    const listEl = page.querySelector('#event-list');
+    const emptyState = page.querySelector('#event-empty');
     const searchInput = document.getElementById('event-search');
     const dateFromInput = document.getElementById('event-date-from');
     const dateToInput = document.getElementById('event-date-to');
     const locationInput = document.getElementById('event-location');
     const clearFiltersBtn = document.getElementById('event-clear-filters');
     const form = document.getElementById('event-form');
-    const formResetBtn = document.getElementById('event-form-reset');
+    const resetBtn = document.getElementById('event-form-reset');
 
     let eventsData = [];
+    let debounceTimer;
 
-    function toggleEmptyState(hasItems) {
-      if (!emptyState) return;
-      emptyState.hidden = hasItems;
-    }
+    const toggleEmpty = hasItems => {
+      if (emptyState) emptyState.hidden = hasItems;
+      if (listEl) listEl.hidden = !hasItems;
+    };
 
-    function renderEvents(events) {
+    const renderEvents = items => {
       if (!listEl) return;
       listEl.innerHTML = '';
-      if (!events.length) {
-        toggleEmptyState(false);
+      if (!items.length) {
+        toggleEmpty(false);
         return;
       }
-      toggleEmptyState(true);
-      events.forEach(eventItem => {
+      toggleEmpty(true);
+      items.forEach(eventItem => {
         const li = document.createElement('li');
+        li.className = 'event-card';
         li.dataset.eventId = eventItem.id;
-        li.style.background = '#ffffff';
-        li.style.borderRadius = '14px';
-        li.style.border = '1px solid rgba(1,125,113,0.18)';
-        li.style.boxShadow = '0 8px 22px rgba(0,0,0,0.08)';
-        li.style.padding = '16px 18px';
-        li.style.display = 'flex';
-        li.style.flexDirection = 'column';
-        li.style.gap = '8px';
 
         const header = document.createElement('div');
-        header.style.display = 'flex';
-        header.style.justifyContent = 'space-between';
-        header.style.alignItems = 'center';
-        header.style.gap = '12px';
-        header.style.flexWrap = 'wrap';
+        header.className = 'event-meta';
 
         const title = document.createElement('h3');
-        title.textContent = eventItem.title;
-        title.style.margin = '0';
-        title.style.fontSize = '1.1rem';
-        title.style.color = '#013d37';
+        title.className = 'card__title';
+        title.textContent = eventItem.title || 'Untitled event';
 
-        const dateTime = document.createElement('time');
+        const timeEl = document.createElement('time');
+        timeEl.dateTime = eventItem.event_date || '';
         const date = eventItem.event_date ? new Date(eventItem.event_date) : null;
-        const formattedDate = date ? date.toLocaleDateString() : '';
-        dateTime.textContent = formattedDate + (eventItem.event_time ? ` at ${eventItem.event_time}` : '');
-        dateTime.dateTime = eventItem.event_date || '';
-        dateTime.style.fontSize = '0.85rem';
-        dateTime.style.color = '#4a4a4a';
+        const formattedDate = date ? date.toLocaleDateString() : 'TBA';
+        timeEl.textContent = eventItem.event_time ? `${formattedDate} at ${eventItem.event_time}` : formattedDate;
 
-        header.append(title, dateTime);
+        header.append(title, timeEl);
 
         const description = document.createElement('p');
+        description.className = 'card__text';
         description.textContent = eventItem.description || 'No description provided.';
-        description.style.margin = '0';
-        description.style.color = '#4a4a4a';
 
         const location = document.createElement('p');
+        location.className = 'card__text card__text--emphasis';
         location.textContent = `Location: ${eventItem.location || 'TBA'}`;
-        location.style.margin = '0';
-        location.style.color = '#013d37';
-        location.style.fontWeight = '600';
 
-        const buttonRow = document.createElement('div');
-        buttonRow.style.display = 'flex';
-        buttonRow.style.gap = '12px';
+        const actions = document.createElement('div');
+        actions.className = 'event-actions';
 
         const bookBtn = document.createElement('button');
         bookBtn.type = 'button';
+        bookBtn.className = 'btn btn-primary';
         bookBtn.textContent = 'Book';
-        bookBtn.style.background = '#017d71';
-        bookBtn.style.color = '#ffffff';
-        bookBtn.style.border = 'none';
-        bookBtn.style.padding = '8px 14px';
-        bookBtn.style.borderRadius = '16px';
-        bookBtn.style.fontWeight = '600';
         bookBtn.addEventListener('click', async event => {
           event.stopPropagation();
           if (!userId) {
-            pushFlash('error', 'You must be logged in to book an event.');
+            showFlash('error', 'You must be logged in to book an event.');
             return;
           }
           try {
@@ -260,43 +228,39 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-              pushFlash('error', data.message || 'Unable to book this event.');
+              showFlash('error', data.message || 'Unable to book this event.');
               return;
             }
-            pushFlash('success', `Booked ${eventItem.title}`);
+            showFlash('success', `Booked ${eventItem.title || 'event'}.`);
           } catch (error) {
             console.error('Book event error:', error);
-            pushFlash('error', 'Network error while booking.');
+            showFlash('error', 'Network error while booking.');
           }
         });
 
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
+        deleteBtn.className = 'btn btn-outline event-delete';
         deleteBtn.textContent = 'Delete';
-        deleteBtn.style.background = 'transparent';
-        deleteBtn.style.color = '#b02a37';
-        deleteBtn.style.border = '1px solid rgba(176,42,55,0.4)';
-        deleteBtn.style.padding = '8px 14px';
-        deleteBtn.style.borderRadius = '16px';
-        deleteBtn.style.fontWeight = '600';
         deleteBtn.addEventListener('click', async event => {
           event.stopPropagation();
           if (!confirm('Delete this event?')) return;
           try {
             const res = await fetch(`/events/${eventItem.id}`, {
               method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' }
+              credentials: 'include'
             });
             if (!res.ok) {
-              pushFlash('error', 'Unable to delete this event.');
+              const data = await res.json().catch(() => ({}));
+              showFlash('error', data.message || 'Unable to delete this event.');
               return;
             }
             eventsData = eventsData.filter(item => item.id !== eventItem.id);
-            renderEvents(applyEventFilters());
-            pushFlash('success', 'Event removed.');
+            renderEvents(applyFilters(eventsData));
+            showFlash('success', 'Event removed.');
           } catch (error) {
             console.error('Delete event error:', error);
-            pushFlash('error', 'Network error while deleting.');
+            showFlash('error', 'Network error while deleting.');
           }
         });
 
@@ -313,306 +277,310 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         }
 
-        buttonRow.append(bookBtn, deleteBtn);
-        li.append(header, description, location, buttonRow);
-        listEl.append(li);
+        actions.append(bookBtn, deleteBtn);
+        li.append(header, description, location, actions);
+        listEl.appendChild(li);
       });
-    }
+    };
 
-    function applyEventFilters() {
-      const query = (searchInput.value || '').toLowerCase();
-      const locationFilter = (locationInput.value || '').toLowerCase();
-      const fromDate = dateFromInput.value ? new Date(dateFromInput.value) : null;
-      const toDate = dateToInput.value ? new Date(dateToInput.value) : null;
-      return eventsData.filter(item => {
-        const matchesQuery = !query || (item.title && item.title.toLowerCase().includes(query)) || (item.description && item.description.toLowerCase().includes(query));
-        const matchesLocation = !locationFilter || (item.location && item.location.toLowerCase().includes(locationFilter));
-        const eventDate = item.event_date ? new Date(item.event_date) : null;
-        const matchesFrom = !fromDate || (eventDate && eventDate >= fromDate);
-        const matchesTo = !toDate || (eventDate && eventDate <= toDate);
-        return matchesQuery && matchesLocation && matchesFrom && matchesTo;
+    const applyFilters = baseData => {
+      const items = baseData.slice();
+      const locationFilter = locationInput?.value.trim().toLowerCase();
+      const fromValue = dateFromInput?.value ? new Date(dateFromInput.value) : null;
+      const toValue = dateToInput?.value ? new Date(dateToInput.value) : null;
+      return items.filter(eventItem => {
+        if (locationFilter) {
+          const location = (eventItem.location || '').toLowerCase();
+          if (!location.includes(locationFilter)) return false;
+        }
+        if (fromValue) {
+          const date = eventItem.event_date ? new Date(eventItem.event_date) : null;
+          if (!date || date < fromValue) return false;
+        }
+        if (toValue) {
+          const date = eventItem.event_date ? new Date(eventItem.event_date) : null;
+          if (!date || date > toValue) return false;
+        }
+        return true;
       });
-    }
+    };
 
-    async function fetchEvents() {
+    const fetchEvents = async (searchTerm = '') => {
       try {
-        const res = await fetch('/events', { credentials: 'include' });
-        if (!res.ok) throw new Error('Failed to load events');
-        const data = await res.json();
-        eventsData = Array.isArray(data) ? data : [];
-        renderEvents(applyEventFilters());
+        const url = new URL('/events', window.location.origin);
+        if (searchTerm) url.searchParams.set('search', searchTerm);
+        const res = await fetch(url.toString(), { credentials: 'include' });
+        if (!res.ok) throw new Error('Unable to fetch events');
+        eventsData = await res.json();
+        renderEvents(applyFilters(eventsData));
       } catch (error) {
         console.error('Fetch events error:', error);
-        pushFlash('error', 'Unable to load events.');
+        showFlash('error', 'Unable to load events.');
       }
-    }
+    };
 
-    if (form) {
-      form.addEventListener('submit', async event => {
-        event.preventDefault();
-        const payload = {
-          title: form.title.value.trim(),
-          description: form.description.value.trim(),
-          evDate: form.evDate.value,
-          evTime: form.evTime.value,
-          location: form.location.value.trim(),
-          type: form.type.value.trim(),
-          capacity: form.capacity.value ? Number(form.capacity.value) : undefined
-        };
-        try {
-          const method = form.querySelector('#event-id').value ? 'PUT' : 'POST';
-          const url = method === 'POST' ? '/events' : `/events/${form.querySelector('#event-id').value}`;
-          const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) {
-            pushFlash('error', data.message || 'Unable to save event.');
-            return;
-          }
-          pushFlash('success', method === 'POST' ? 'Event created.' : 'Event updated.');
-          form.reset();
-          form.querySelector('#event-id').value = '';
-          await fetchEvents();
-        } catch (error) {
-          console.error('Save event error:', error);
-          pushFlash('error', 'Unable to save event right now.');
-        }
-      });
-    }
+    const handleSearchChange = () => {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
+        const term = searchInput?.value.trim() || '';
+        fetchEvents(term);
+      }, 250);
+    };
 
-    if (formResetBtn) {
-      formResetBtn.addEventListener('click', () => {
-        form.reset();
-        form.querySelector('#event-id').value = '';
-      });
-    }
+    searchInput?.addEventListener('input', handleSearchChange);
+    dateFromInput?.addEventListener('change', () => renderEvents(applyFilters(eventsData)));
+    dateToInput?.addEventListener('change', () => renderEvents(applyFilters(eventsData)));
+    locationInput?.addEventListener('input', () => renderEvents(applyFilters(eventsData)));
 
-    [searchInput, dateFromInput, dateToInput, locationInput].forEach(input => {
-      if (!input) return;
-      input.addEventListener('input', () => renderEvents(applyEventFilters()));
+    clearFiltersBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (dateFromInput) dateFromInput.value = '';
+      if (dateToInput) dateToInput.value = '';
+      if (locationInput) locationInput.value = '';
+      renderEvents(eventsData);
     });
 
-    if (clearFiltersBtn) {
-      clearFiltersBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        dateFromInput.value = '';
-        dateToInput.value = '';
-        locationInput.value = '';
-        renderEvents(eventsData);
-      });
-    }
-
-    fetchEvents();
-  }
-
-  // -------------------- Mood tracking page --------------------
-  const moodRoot = document.getElementById('mood-tracking');
-  if (moodRoot) {
-    const userId = moodRoot.getAttribute('data-user-id');
-    const scoreInput = document.getElementById('mood-score');
-    const notesInput = document.getElementById('mood-notes');
-    const form = document.getElementById('mood-form');
-    const tableBody = document.querySelector('#mood-table tbody');
-    const emptyState = document.getElementById('mood-empty');
-    const summaryEntries = document.getElementById('mood-summary-count');
-    const summaryStreak = document.getElementById('mood-summary-streak');
-    const summaryAverage = document.getElementById('mood-summary-average');
-    const chartCanvas = document.getElementById('mood-chart');
-    let chartInstance = null;
-    let moodData = [];
-
-    function updateSummary() {
-      const entriesCount = moodData.length;
-      if (summaryEntries) summaryEntries.textContent = `Entries logged: ${entriesCount}`;
-      const streak = calculateStreak(moodData);
-      if (summaryStreak) summaryStreak.textContent = `Current streak: ${streak} day${streak === 1 ? '' : 's'}`;
-      const average = calculateAverage(moodData);
-      if (summaryAverage) summaryAverage.textContent = `Average score: ${Number.isFinite(average) ? average.toFixed(1) : '—'}`;
-    }
-
-    function calculateAverage(entries) {
-      if (!entries.length) return NaN;
-      const total = entries.reduce((sum, entry) => sum + Number(entry.score ?? entry.mood_score ?? 0), 0);
-      return total / entries.length;
-    }
-
-    function calculateStreak(entries) {
-      const dateSet = new Set();
-      entries.forEach(entry => {
-        const raw = entry.created_at || entry.date;
-        if (!raw) return;
-        const parsed = new Date(raw);
-        if (Number.isNaN(parsed.getTime())) return;
-        const normalized = new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate()));
-        dateSet.add(normalized.toISOString().split('T')[0]);
-      });
-      if (!dateSet.size) return 0;
-      const today = new Date();
-      const cursor = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-      let streak = 0;
-      let cursorKey = cursor.toISOString().split('T')[0];
-      while (dateSet.has(cursorKey)) {
-        streak += 1;
-        cursor.setUTCDate(cursor.getUTCDate() - 1);
-        cursorKey = cursor.toISOString().split('T')[0];
-      }
-      return streak;
-    }
-
-    function renderMoodTable(entries) {
-      if (!tableBody) return;
-      tableBody.innerHTML = '';
-      if (!entries.length) {
-        if (emptyState) emptyState.hidden = false;
-        return;
-      }
-      if (emptyState) emptyState.hidden = true;
-      entries.forEach(entry => {
-        const tr = document.createElement('tr');
-        const created = entry.created_at || entry.date;
-        const dateCell = document.createElement('td');
-        dateCell.style.padding = '10px 12px';
-        dateCell.style.borderBottom = '1px solid rgba(1,125,113,0.15)';
-        dateCell.textContent = created ? new Date(created).toLocaleString() : '—';
-
-        const scoreCell = document.createElement('td');
-        scoreCell.style.padding = '10px 12px';
-        scoreCell.style.borderBottom = '1px solid rgba(1,125,113,0.15)';
-        scoreCell.style.fontWeight = '600';
-        scoreCell.style.color = '#013d37';
-        scoreCell.textContent = entry.score ?? entry.mood_score ?? '—';
-
-        const noteCell = document.createElement('td');
-        noteCell.style.padding = '10px 12px';
-        noteCell.style.borderBottom = '1px solid rgba(1,125,113,0.15)';
-        noteCell.textContent = entry.notes || entry.note || '—';
-
-        tr.append(dateCell, scoreCell, noteCell);
-        tableBody.append(tr);
-      });
-    }
-
-    function renderChart(entries) {
-      if (!chartCanvas || typeof window.Chart === 'undefined') return;
-      const labels = entries.slice(-10).map(entry => {
-        const raw = entry.created_at || entry.date;
-        return raw ? new Date(raw).toLocaleDateString() : '';
-      });
-      const values = entries.slice(-10).map(entry => Number(entry.score ?? entry.mood_score ?? 0));
-      if (chartInstance) chartInstance.destroy();
-      chartInstance = new window.Chart(chartCanvas.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Mood score',
-            data: values,
-            borderColor: '#017d71',
-            backgroundColor: 'rgba(1,125,113,0.15)',
-            tension: 0.3,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: { beginAtZero: true, suggestedMax: 10 }
-          }
-        }
-      });
-    }
-
-    async function fetchMoods() {
-      if (!userId) return;
+    form?.addEventListener('submit', async event => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+      const eventId = payload.id;
+      const method = eventId ? 'PUT' : 'POST';
+      const url = eventId ? `/events/${eventId}` : '/events';
       try {
-        const res = await fetch(`/moodTracking?user_id=${encodeURIComponent(userId)}`, {
-          credentials: 'include'
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
         });
-        if (!res.ok) throw new Error('Failed to load moods');
-        const data = await res.json();
-        moodData = Array.isArray(data) ? data : [];
-        renderMoodTable(moodData);
-        updateSummary();
-        renderChart(moodData);
-      } catch (error) {
-        console.error('Fetch moods error:', error);
-        pushFlash('error', 'Unable to load mood entries.');
-      }
-    }
-
-    const scoreButtons = document.querySelectorAll('.mood-score');
-    scoreButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const value = button.getAttribute('data-score');
-        if (scoreInput) {
-          scoreInput.value = value || '';
-          scoreInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      });
-    });
-
-    if (form) {
-      form.addEventListener('submit', async event => {
-        event.preventDefault();
-        if (!userId) {
-          pushFlash('error', 'You must be logged in to log a mood.');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showFlash('error', data.message || 'Unable to save event.');
           return;
         }
-        const payload = {
-          user_id: userId,
-          score: scoreInput.value,
-          notes: notesInput.value.trim()
-        };
-        try {
-          const res = await fetch('/moodTracking/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) {
-            pushFlash('error', data.message || 'Unable to save mood.');
-            return;
-          }
-          pushFlash('success', 'Mood logged.');
-          form.reset();
-          await fetchMoods();
-        } catch (error) {
-          console.error('Mood submit error:', error);
-          pushFlash('error', 'Unable to log mood right now.');
-        }
-      });
+        showFlash('success', eventId ? 'Event updated.' : 'Event created.');
+        form.reset();
+        form.querySelector('#event-id').value = '';
+        fetchEvents(searchInput?.value.trim() || '');
+      } catch (error) {
+        console.error('Save event error:', error);
+        showFlash('error', 'Network error while saving event.');
+      }
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      form?.reset();
+      if (form) form.querySelector('#event-id').value = '';
+    });
+
+    fetchEvents();
+  };
+
+  // -------------------- Mood tracking --------------------
+  const initMoodPage = () => {
+    const moodRoot = document.getElementById('mood-tracking');
+    if (!moodRoot) return;
+    const userId = moodRoot.getAttribute('data-user-id');
+    const moodsRaw = moodRoot.getAttribute('data-moods');
+    let moodData = [];
+    if (moodsRaw) {
+      try {
+        moodData = JSON.parse(moodsRaw);
+      } catch (error) {
+        console.warn('Failed to parse initial moods:', error);
+      }
     }
 
-    const rangeButtons = document.querySelectorAll('.mood-range');
-    rangeButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const days = Number(button.getAttribute('data-range'));
-        if (!Number.isFinite(days) || !moodData.length) return;
-        const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-        const filtered = moodData.filter(entry => {
-          const raw = entry.created_at || entry.date;
-          if (!raw) return false;
-          const time = new Date(raw).getTime();
-          return Number.isFinite(time) && time >= cutoff;
-        });
-        renderMoodTable(filtered);
-        renderChart(filtered);
+    const scoreButtons = Array.from(moodRoot.querySelectorAll('.mood-score-button'));
+    const form = document.getElementById('mood-form');
+    const scoreInput = document.getElementById('mood-score');
+    const notesInput = document.getElementById('mood-notes');
+    const emptyState = document.getElementById('mood-empty');
+    const tableBody = document.querySelector('#mood-table tbody');
+    const countEl = document.getElementById('mood-summary-count');
+    const streakEl = document.getElementById('mood-summary-streak');
+    const averageEl = document.getElementById('mood-summary-average');
+    const rangeButtons = Array.from(moodRoot.querySelectorAll('.mood-range'));
+
+    const setSelectedScore = value => {
+      scoreButtons.forEach(btn => {
+        const isSelected = btn.dataset.score === String(value);
+        btn.classList.toggle('is-selected', isSelected);
+      });
+      if (scoreInput) scoreInput.value = value || '';
+    };
+
+    scoreButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setSelectedScore(btn.dataset.score);
       });
     });
 
-    fetchMoods();
-  }
+    const computeSummary = data => {
+      if (!data.length) {
+        countEl.textContent = 'Entries logged: 0';
+        streakEl.textContent = 'Current streak: 0 days';
+        averageEl.textContent = 'Average score: —';
+        return;
+      }
+      let total = 0;
+      const dateSet = new Set();
+      data.forEach(entry => {
+        const scoreValue = Number(entry.score ?? entry.mood_score ?? 0);
+        total += Number.isNaN(scoreValue) ? 0 : scoreValue;
+        const rawDate = entry.created_at || entry.date;
+        if (rawDate) {
+          const parsed = new Date(rawDate);
+          if (!Number.isNaN(parsed.getTime())) {
+            const normalized = new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate()));
+            dateSet.add(normalized.toISOString().split('T')[0]);
+          }
+        }
+      });
+      const average = (total / data.length).toFixed(1);
+      let streak = 0;
+      if (dateSet.size) {
+        const today = new Date();
+        const cursor = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+        let cursorKey = cursor.toISOString().split('T')[0];
+        while (dateSet.has(cursorKey)) {
+          streak += 1;
+          cursor.setUTCDate(cursor.getUTCDate() - 1);
+          cursorKey = cursor.toISOString().split('T')[0];
+        }
+      }
+      countEl.textContent = `Entries logged: ${data.length}`;
+      streakEl.textContent = `Current streak: ${streak} day${streak === 1 ? '' : 's'}`;
+      averageEl.textContent = `Average score: ${average}`;
+    };
+
+    const renderTable = data => {
+      if (!tableBody) return;
+      tableBody.innerHTML = '';
+      if (!data.length) {
+        emptyState?.removeAttribute('hidden');
+        return;
+      }
+      emptyState?.setAttribute('hidden', '');
+      data.forEach(entry => {
+        const row = document.createElement('tr');
+        const dateCell = document.createElement('td');
+        const scoreCell = document.createElement('td');
+        const noteCell = document.createElement('td');
+        dateCell.textContent = entry.created_at || entry.date
+          ? new Date(entry.created_at || entry.date).toLocaleString()
+          : '—';
+        scoreCell.textContent = entry.score ?? entry.mood_score ?? '—';
+        noteCell.textContent = entry.notes || entry.note || '—';
+        row.append(dateCell, scoreCell, noteCell);
+        tableBody.appendChild(row);
+      });
+    };
+
+    const applyRangeFilter = days => {
+      if (!days) {
+        renderTable(moodData);
+        computeSummary(moodData);
+        return;
+      }
+      const today = new Date();
+      const filtered = moodData.filter(entry => {
+        const raw = entry.created_at || entry.date;
+        if (!raw) return false;
+        const entryDate = new Date(raw);
+        if (Number.isNaN(entryDate.getTime())) return false;
+        const diff = today.getTime() - entryDate.getTime();
+        return diff <= days * 24 * 60 * 60 * 1000;
+      });
+      renderTable(filtered);
+      computeSummary(filtered);
+    };
+
+    const fetchMoods = async () => {
+      if (!userId) return;
+      try {
+        const url = new URL('/moodTracking', window.location.origin);
+        url.searchParams.set('user_id', userId);
+        const res = await fetch(url.toString(), { credentials: 'include' });
+        if (!res.ok) throw new Error('Unable to fetch moods');
+        moodData = await res.json();
+        applyRangeFilter(activeRange());
+      } catch (error) {
+        console.error('Fetch moods error:', error);
+        showFlash('error', 'Unable to load mood history.');
+      }
+    };
+
+    const clearRangeSelection = () => {
+      rangeButtons.forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline');
+        btn.removeAttribute('aria-pressed');
+      });
+    };
+
+    const activeRange = () => {
+      const activeBtn = rangeButtons.find(btn => btn.getAttribute('aria-pressed') === 'true');
+      return activeBtn ? Number(activeBtn.dataset.range) : 0;
+    };
+
+    rangeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const range = Number(btn.dataset.range);
+        const isActive = btn.getAttribute('aria-pressed') === 'true';
+        clearRangeSelection();
+        if (!isActive) {
+          btn.classList.add('btn-primary');
+          btn.classList.remove('btn-outline');
+          btn.setAttribute('aria-pressed', 'true');
+        }
+        applyRangeFilter(isActive ? 0 : range);
+      });
+    });
+
+    form?.addEventListener('submit', async event => {
+      event.preventDefault();
+      const score = Number(scoreInput?.value || 0);
+      if (!userId || !score) {
+        showFlash('error', 'Please choose a score before saving.');
+        return;
+      }
+      const payload = {
+        user_id: userId,
+        score,
+        notes: notesInput?.value?.trim() || ''
+      };
+      try {
+        const res = await fetch('/moodTracking/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          showFlash('error', data.message || 'Unable to log mood.');
+          return;
+        }
+        showFlash('success', 'Mood saved.');
+        form.reset();
+        scoreButtons.forEach(btn => btn.classList.remove('is-selected'));
+        await fetchMoods();
+      } catch (error) {
+        console.error('Save mood error:', error);
+        showFlash('error', 'Network error while saving mood.');
+      }
+    });
+
+    renderTable(moodData);
+    computeSummary(moodData);
+  };
 
   // -------------------- Social page --------------------
-  const socialRoot = document.getElementById('social-page');
-  if (socialRoot) {
+  const initSocialPage = () => {
+    const socialRoot = document.getElementById('social-page');
+    if (!socialRoot) return;
     const userId = socialRoot.getAttribute('data-user-id');
     const searchInput = document.getElementById('social-search');
     const resultsList = document.getElementById('social-results');
@@ -620,160 +588,192 @@ document.addEventListener('DOMContentLoaded', () => {
     const outgoingList = document.getElementById('social-outgoing');
     const connectionsList = document.getElementById('social-connections');
 
-    let debounceTimer = null;
+    let searchTimer;
 
-    function debounce(fn, delay = 250) {
-      return (...args) => {
-        if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => fn.apply(null, args), delay);
-      };
-    }
+    const renderList = (listEl, items, renderer, emptyMessage) => {
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      if (!items.length) {
+        const li = document.createElement('li');
+        li.className = 'social-empty';
+        li.textContent = emptyMessage;
+        listEl.appendChild(li);
+        return;
+      }
+      items.forEach(item => listEl.appendChild(renderer(item)));
+    };
 
-    async function searchPeople(query) {
+    const fetchJson = async (url, options = {}) => {
+      const res = await fetch(url, { credentials: 'include', ...options });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || res.statusText || 'Request failed');
+      }
+      return res.json();
+    };
+
+    const loadConnections = async () => {
+      if (!userId) return;
+      try {
+        const data = await fetchJson(`/social/connections?user_id=${encodeURIComponent(userId)}`);
+        renderList(connectionsList, data, connection => {
+          const li = document.createElement('li');
+          li.className = 'social-item social-item--inline';
+          li.dataset.connectionId = connection.connection_id || connection.id;
+          const info = document.createElement('div');
+          const name = document.createElement('p');
+          name.className = 'card__text card__text--emphasis';
+          name.textContent = connection.friend_name || connection.full_name || 'Connection';
+          const meta = document.createElement('p');
+          meta.className = 'social-note';
+          meta.textContent = `Connected since: ${connection.connected_at ? new Date(connection.connected_at).toLocaleDateString() : 'Pending'}`;
+          info.append(name, meta);
+          const messageBtn = document.createElement('button');
+          messageBtn.type = 'button';
+          messageBtn.className = 'btn btn-primary social-message';
+          messageBtn.textContent = 'Message';
+          messageBtn.addEventListener('click', () => showFlash('info', 'Messaging coming soon.'));
+          li.append(info, messageBtn);
+          return li;
+        }, 'You have no connections yet.');
+      } catch (error) {
+        console.error('Connections error:', error);
+        showFlash('error', 'Unable to load connections.');
+      }
+    };
+
+    const loadRequests = async () => {
+      if (!userId) return;
+      try {
+        const data = await fetchJson(`/social/connections/requests?user_id=${encodeURIComponent(userId)}`);
+        const incoming = data.filter(item => item.requester_id !== Number(userId));
+        const outgoing = data.filter(item => item.requester_id === Number(userId));
+
+        renderList(incomingList, incoming, req => {
+          const li = document.createElement('li');
+          li.className = 'social-item';
+          li.dataset.connectionId = req.connection_id || req.id;
+          const info = document.createElement('div');
+          const name = document.createElement('p');
+          name.className = 'card__text card__text--emphasis';
+          name.textContent = req.requester_name || req.full_name || 'Unknown user';
+          const email = document.createElement('p');
+          email.className = 'social-note';
+          email.textContent = req.requester_email || req.email || '';
+          info.append(name, email);
+          const actions = document.createElement('div');
+          actions.className = 'social-actions';
+          const acceptBtn = document.createElement('button');
+          acceptBtn.type = 'button';
+          acceptBtn.className = 'btn btn-primary social-accept';
+          acceptBtn.textContent = 'Accept';
+          acceptBtn.addEventListener('click', () => respondToRequest(req.connection_id || req.id, 'accept'));
+          const rejectBtn = document.createElement('button');
+          rejectBtn.type = 'button';
+          rejectBtn.className = 'btn btn-outline social-reject';
+          rejectBtn.textContent = 'Reject';
+          rejectBtn.addEventListener('click', () => respondToRequest(req.connection_id || req.id, 'reject'));
+          actions.append(acceptBtn, rejectBtn);
+          li.append(info, actions);
+          return li;
+        }, 'No pending requests.');
+
+        renderList(outgoingList, outgoing, req => {
+          const li = document.createElement('li');
+          li.className = 'social-item';
+          li.dataset.connectionId = req.connection_id || req.id;
+          const name = document.createElement('p');
+          name.className = 'card__text card__text--emphasis';
+          name.textContent = req.recipient_name || req.full_name || req.friend_name || 'Pending user';
+          const status = document.createElement('p');
+          status.className = 'social-note';
+          status.textContent = `Status: ${req.status || 'pending'}`;
+          li.append(name, status);
+          return li;
+        }, 'No outgoing requests.');
+      } catch (error) {
+        console.error('Requests error:', error);
+        showFlash('error', 'Unable to load requests.');
+      }
+    };
+
+    const searchPeople = async term => {
       if (!resultsList) return;
-      if (!query) {
-        resultsList.innerHTML = '<li id="social-results-empty" style="background:rgba(1,125,113,0.06);padding:16px;border-radius:12px;color:#4a4a4a;">Start typing to find people.</li>';
+      if (!term) {
+        resultsList.innerHTML = '<li id="social-results-empty" class="social-empty">Start typing to find people.</li>';
         return;
       }
       try {
-        const res = await fetch(`/social/users?search=${encodeURIComponent(query)}`, {
-          credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Search failed');
-        const data = await res.json();
-        renderResults(Array.isArray(data) ? data : []);
+        const data = await fetchJson(`/social/people?q=${encodeURIComponent(term)}`);
+        renderList(resultsList, data, person => {
+          const li = document.createElement('li');
+          li.className = 'social-item social-item--inline';
+          li.dataset.userId = person.id;
+          const info = document.createElement('div');
+          const name = document.createElement('p');
+          name.className = 'card__text card__text--emphasis';
+          name.textContent = person.full_name || person.name || 'Unknown user';
+          const email = document.createElement('p');
+          email.className = 'social-note';
+          email.textContent = person.email || '';
+          info.append(name, email);
+          const addBtn = document.createElement('button');
+          addBtn.type = 'button';
+          addBtn.className = 'btn btn-primary social-add';
+          addBtn.textContent = 'Add';
+          addBtn.addEventListener('click', () => sendRequest(person.id));
+          li.append(info, addBtn);
+          return li;
+        }, 'No matching people found.');
       } catch (error) {
         console.error('Search people error:', error);
-        pushFlash('error', 'Unable to search right now.');
+        showFlash('error', 'Unable to search people right now.');
       }
-    }
+    };
 
-    function renderResults(results) {
-      if (!resultsList) return;
-      resultsList.innerHTML = '';
-      if (!results.length) {
-        const li = document.createElement('li');
-        li.textContent = 'No people found.';
-        li.style.background = 'rgba(1,125,113,0.06)';
-        li.style.padding = '16px';
-        li.style.borderRadius = '12px';
-        li.style.color = '#4a4a4a';
-        resultsList.append(li);
-        return;
-      }
-      results.forEach(person => {
-        const li = document.createElement('li');
-        li.dataset.userId = person.id;
-        li.style.background = '#ffffff';
-        li.style.border = '1px solid rgba(1,125,113,0.18)';
-        li.style.boxShadow = '0 8px 22px rgba(0,0,0,0.08)';
-        li.style.padding = '16px 18px';
-        li.style.borderRadius = '14px';
-        li.style.display = 'flex';
-        li.style.justifyContent = 'space-between';
-        li.style.alignItems = 'center';
-        li.style.gap = '12px';
-        li.style.flexWrap = 'wrap';
-
-        const info = document.createElement('div');
-        const name = document.createElement('p');
-        name.textContent = person.full_name || person.name || 'Unknown user';
-        name.style.margin = '0';
-        name.style.fontWeight = '600';
-        name.style.color = '#013d37';
-
-        const email = document.createElement('p');
-        email.textContent = person.email || '';
-        email.style.margin = '4px 0 0';
-        email.style.color = '#4a4a4a';
-        email.style.fontSize = '0.9rem';
-
-        info.append(name, email);
-
-        const addBtn = document.createElement('button');
-        addBtn.type = 'button';
-        addBtn.textContent = 'Add';
-        addBtn.className = 'social-add';
-        addBtn.style.background = '#017d71';
-        addBtn.style.color = '#ffffff';
-        addBtn.style.border = 'none';
-        addBtn.style.padding = '8px 14px';
-        addBtn.style.borderRadius = '16px';
-        addBtn.style.fontWeight = '600';
-        addBtn.addEventListener('click', () => sendConnectionRequest(person.id));
-
-        li.append(info, addBtn);
-        resultsList.append(li);
-      });
-    }
-
-    async function sendConnectionRequest(targetId) {
-      if (!userId) {
-        pushFlash('error', 'You must be logged in to add connections.');
-        return;
-      }
+    const sendRequest = async targetId => {
+      if (!userId) return;
       try {
-        const res = await fetch('/social/connections', {
+        await fetchJson('/social/connections', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ requester_id: userId, target_user_id: targetId })
+          body: JSON.stringify({ requester_id: Number(userId), target_user_id: targetId })
         });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          pushFlash('error', data.error || data.message || 'Unable to send request.');
-          return;
-        }
-        pushFlash('success', 'Connection request sent.');
+        showFlash('success', 'Request sent.');
+        loadRequests();
       } catch (error) {
-        console.error('Send connection error:', error);
-        pushFlash('error', 'Unable to send connection request.');
+        console.error('Send request error:', error);
+        showFlash('error', error.message || 'Unable to send request.');
       }
-    }
+    };
 
-    async function respondToRequest(connectionId, action) {
-      if (!userId) {
-        pushFlash('error', 'Login required to manage requests.');
-        return;
-      }
+    const respondToRequest = async (connectionId, action) => {
+      if (!userId) return;
       try {
-        const res = await fetch(`/social/connections/${connectionId}`, {
+        await fetchJson(`/social/connections/${connectionId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ user_id: userId, action })
+          body: JSON.stringify({ user_id: Number(userId), action })
         });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          pushFlash('error', data.error || data.message || 'Unable to update request.');
-          return;
-        }
-        pushFlash('success', action === 'accept' ? 'Connection accepted.' : 'Request declined.');
-        const item = document.querySelector(`[data-connection-id="${connectionId}"]`);
-        if (item) item.remove();
+        showFlash('success', action === 'accept' ? 'Request accepted.' : 'Request updated.');
+        await Promise.all([loadRequests(), loadConnections()]);
       } catch (error) {
-        console.error('Respond connection error:', error);
-        pushFlash('error', 'Unable to update connection request.');
+        console.error('Respond request error:', error);
+        showFlash('error', error.message || 'Unable to update request.');
       }
-    }
+    };
 
-    if (incomingList) {
-      incomingList.addEventListener('click', event => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        if (target.classList.contains('social-accept') || target.classList.contains('social-reject')) {
-          const action = target.dataset.action;
-          const id = target.dataset.connectionId;
-          respondToRequest(id, action);
-        }
-      });
-    }
+    searchInput?.addEventListener('input', () => {
+      window.clearTimeout(searchTimer);
+      const term = searchInput.value.trim();
+      searchTimer = window.setTimeout(() => searchPeople(term), 300);
+    });
 
-    if (searchInput) {
-      searchInput.addEventListener('input', debounce(event => {
-        const value = event.target.value.trim();
-        searchPeople(value);
-      }));
-    }
-  }
+    loadConnections();
+    loadRequests();
+  };
+
+  initEventsPage();
+  initMoodPage();
+  initSocialPage();
 });

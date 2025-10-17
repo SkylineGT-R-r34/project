@@ -1,22 +1,24 @@
 <%
   const body = () => { %>
-    <div class="login" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;">
-      <%- include('partials/pageHeader', { title: 'Login', subtitle: 'Access your CampusWell dashboard with your campus email.' }) %>
-      <form id="loginForm" data-validate style="display:flex;flex-direction:column;gap:12px;background-color:#ffffff;padding:28px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.12);width:320px;">
-        <label for="login-email" style="display:flex;flex-direction:column;gap:6px;text-align:left;color:#013d37;font-weight:600;">
-          Email
-          <input type="email" id="login-email" name="email" required placeholder="you@example.com" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-        </label>
-        <label for="login-password" style="display:flex;flex-direction:column;gap:6px;text-align:left;color:#013d37;font-weight:600;">
-          Password
-          <input type="password" id="login-password" name="password" required placeholder="Password" minlength="6" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-        </label>
-        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.9rem;">
-          <a href="/auth/reset_password" style="color:#017d71;">Forgot your password?</a>
-          <span>Don't have an account? <a href="/auth/register" style="color:#017d71;">Register</a></span>
-        </div>
-        <button type="submit" style="background-color:#017d71;color:#ffffff;cursor:pointer;padding:10px;border-radius:10px;border:none;font-weight:600;">Login</button>
-      </form>
-    </div>
+    <section class="page-section auth-page">
+      <div class="login">
+        <%- include('partials/pageHeader', { title: 'Login', subtitle: 'Access your CampusWell dashboard with your campus email.' }) %>
+        <form id="loginForm" data-validate>
+          <div class="form-field">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" name="email" class="form-control" required placeholder="you@example.com" />
+          </div>
+          <div class="form-field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" class="form-control" required minlength="6" placeholder="Password" />
+          </div>
+          <div class="auth-links">
+            <a href="/auth/reset_password">Forgot your password?</a>
+            <span>Don't have an account? <a href="/auth/register">Register</a></span>
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+    </section>
   <% }; %>
 <%- include('layouts/layout') %>

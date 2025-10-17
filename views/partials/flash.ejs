@@ -4,19 +4,19 @@
     (typeof locals !== 'undefined' ? locals.flash : undefined);
 %>
 <% if (flashData && (flashData.success || flashData.error || flashData.info)) { %>
-  <div class="flash-wrapper" style="max-width:640px;margin:20px auto 0;display:flex;flex-direction:column;gap:12px;">
+  <div class="flash-wrapper" data-flash-wrapper>
     <% if (flashData.success) { %>
-      <div class="flash-message flash-success" role="status" aria-live="polite" style="background:#ffffff;border:1px solid rgba(1,125,113,0.3);box-shadow:0 4px 10px rgba(0,0,0,0.05);padding:16px 18px;border-radius:12px;color:#0b5137;">
+      <div class="flash-message flash-success" role="status" aria-live="polite">
         <strong>Success:</strong> <%= flashData.success %>
       </div>
     <% } %>
     <% if (flashData.info) { %>
-      <div class="flash-message flash-info" role="status" aria-live="polite" style="background:#ffffff;border:1px solid rgba(1,125,113,0.2);box-shadow:0 4px 10px rgba(0,0,0,0.05);padding:16px 18px;border-radius:12px;color:#013d37;">
+      <div class="flash-message flash-info" role="status" aria-live="polite">
         <strong>Note:</strong> <%= flashData.info %>
       </div>
     <% } %>
     <% if (flashData.error) { %>
-      <div class="flash-message flash-error" role="alert" style="background:#ffffff;border:1px solid rgba(180,44,44,0.35);box-shadow:0 4px 12px rgba(0,0,0,0.08);padding:16px 18px;border-radius:12px;color:#742323;">
+      <div class="flash-message flash-error" role="alert">
         <strong>Error:</strong> <%= flashData.error %>
       </div>
     <% } %>

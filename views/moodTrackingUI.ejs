@@ -27,68 +27,73 @@
     }
   }
   const body = () => { %>
-    <section style="display:flex;flex-direction:column;gap:24px;">
+    <section class="page-section">
       <%- include('partials/pageHeader', { title: 'Mood tracking', subtitle: 'Log your feelings, add short notes, and review recent entries.' }) %>
-      <div id="mood-tracking" data-user-id="<%= user ? user.id : '' %>" style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">
-        <div style="flex:1 1 320px;min-width:280px;background:#ffffff;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
-          <h2 style="margin:0;color:#013d37;font-size:1.3rem;">Log today’s mood</h2>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <div
+        id="mood-tracking"
+        data-user-id="<%= user ? user.id : '' %>"
+        data-moods='<%- JSON.stringify(moodEntries).replace(/'/g, '&#39;') %>'
+        class="mood-layout"
+      >
+        <div class="mood-card">
+          <h2 class="card__title">Log today’s mood</h2>
+          <div class="mood-score-buttons">
             <% [1,2,3,4,5,6,7,8,9,10].forEach(score => { %>
-              <button type="button" class="mood-score" data-score="<%= score %>" style="flex:1 1 48px;min-width:48px;padding:10px;border-radius:12px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;"> <%= score %> </button>
+              <button type="button" class="mood-score-button" data-score="<%= score %>"><%= score %></button>
             <% }) %>
           </div>
-          <form id="mood-form" data-validate style="display:flex;flex-direction:column;gap:12px;">
+          <form id="mood-form" data-validate class="form-grid">
             <input type="hidden" name="user_id" value="<%= user ? user.id : '' %>" />
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Selected score
-              <input type="number" id="mood-score" name="score" min="1" max="10" required style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-            </label>
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Notes
-              <textarea id="mood-notes" name="notes" rows="3" placeholder="How are you feeling today?" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);"></textarea>
-            </label>
-            <button type="submit" style="background:#017d71;color:#ffffff;border:none;padding:10px 18px;border-radius:16px;font-weight:600;">Save mood</button>
+            <div class="form-field">
+              <label for="mood-score">Selected score</label>
+              <input type="number" id="mood-score" name="score" class="form-control" min="1" max="10" required />
+            </div>
+            <div class="form-field">
+              <label for="mood-notes">Notes</label>
+              <textarea id="mood-notes" name="notes" rows="3" class="form-control" placeholder="How are you feeling today?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save mood</button>
           </form>
-          <div style="background:rgba(1,125,113,0.07);padding:16px;border-radius:14px;display:flex;flex-direction:column;gap:6px;">
-            <p style="margin:0;color:#013d37;font-weight:600;">Tracking summary</p>
-            <p id="mood-summary-count" style="margin:0;color:#4a4a4a;">Entries logged: <%= moodEntries.length %></p>
-            <p id="mood-summary-streak" style="margin:0;color:#4a4a4a;">Current streak: <%= streakDays %> day<%= streakDays === 1 ? '' : 's' %></p>
-            <p id="mood-summary-average" style="margin:0;color:#4a4a4a;">Average score: <%= averageScore ?? '—' %></p>
+          <div class="mood-summary-card">
+            <p class="card__text card__text--emphasis">Tracking summary</p>
+            <p id="mood-summary-count" class="card__text">Entries logged: <%= moodEntries.length %></p>
+            <p id="mood-summary-streak" class="card__text">Current streak: <%= streakDays %> day<%= streakDays === 1 ? '' : 's' %></p>
+            <p id="mood-summary-average" class="card__text">Average score: <%= averageScore ?? '—' %></p>
           </div>
         </div>
-        <div style="flex:1 1 420px;min-width:320px;background:#ffffff;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
-          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-            <h2 style="margin:0;color:#013d37;font-size:1.3rem;flex:1 1 auto;">Mood history</h2>
-            <div style="display:flex;gap:8px;">
-              <button type="button" class="mood-range" data-range="7" style="padding:8px 14px;border-radius:16px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;">7 days</button>
-              <button type="button" class="mood-range" data-range="30" style="padding:8px 14px;border-radius:16px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;">30 days</button>
-              <button type="button" class="mood-range" data-range="90" style="padding:8px 14px;border-radius:16px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;">90 days</button>
+        <div class="mood-card">
+          <div class="mood-history-header">
+            <h2 class="card__title">Mood history</h2>
+            <div class="range-buttons">
+              <button type="button" class="btn btn-outline mood-range" data-range="7">7 days</button>
+              <button type="button" class="btn btn-outline mood-range" data-range="30">30 days</button>
+              <button type="button" class="btn btn-outline mood-range" data-range="90">90 days</button>
             </div>
           </div>
           <div id="mood-empty" <%= moodEntries.length ? 'hidden' : '' %>>
             <%- include('partials/emptyState', { title: 'No moods logged', message: 'Log your first mood to build your wellbeing timeline.', ctaHref: '#mood-form', ctaLabel: 'Log a mood' }) %>
           </div>
-          <div style="overflow-x:auto;">
-            <table id="mood-table" style="width:100%;border-collapse:collapse;min-width:320px;">
+          <div class="table-wrapper">
+            <table id="mood-table" class="table" data-has-entries="<%= moodEntries.length > 0 %>">
               <thead>
-                <tr style="background:rgba(1,125,113,0.08);color:#013d37;">
-                  <th style="text-align:left;padding:10px 12px;">Date</th>
-                  <th style="text-align:left;padding:10px 12px;">Score</th>
-                  <th style="text-align:left;padding:10px 12px;">Note</th>
+                <tr>
+                  <th>Date</th>
+                  <th>Score</th>
+                  <th>Note</th>
                 </tr>
               </thead>
               <tbody>
                 <% moodEntries.forEach(entry => { %>
                   <tr>
-                    <td style="padding:10px 12px;border-bottom:1px solid rgba(1,125,113,0.15);"><%= (entry.created_at || entry.date) ? new Date(entry.created_at || entry.date).toLocaleString() : '—' %></td>
-                    <td style="padding:10px 12px;border-bottom:1px solid rgba(1,125,113,0.15);font-weight:600;color:#013d37;"><%= entry.score ?? entry.mood_score %></td>
-                    <td style="padding:10px 12px;border-bottom:1px solid rgba(1,125,113,0.15);"><%= entry.notes || entry.note || '—' %></td>
+                    <td><%= (entry.created_at || entry.date) ? new Date(entry.created_at || entry.date).toLocaleString() : '—' %></td>
+                    <td><%= entry.score ?? entry.mood_score %></td>
+                    <td><%= entry.notes || entry.note || '—' %></td>
                   </tr>
                 <% }) %>
               </tbody>
             </table>
           </div>
-          <canvas id="mood-chart" height="160" style="margin-top:12px;background:#f8fffd;border-radius:14px;" aria-hidden="true"></canvas>
+          <canvas id="mood-chart" height="160" class="chart-canvas" aria-hidden="true"></canvas>
         </div>
       </div>
     </section>

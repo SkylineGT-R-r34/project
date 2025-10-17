@@ -14,22 +14,22 @@
     { title: 'Profile & settings', text: 'Manage your preferences and notification settings.', href: '/profile' }
   ];
   const body = () => { %>
-    <section style="display:flex;flex-direction:column;gap:28px;">
+    <section class="page-section">
       <%- include('partials/pageHeader', { title: `Welcome, ${displayName}`, subtitle: `You are signed in as ${userRole}.` }) %>
-      <div style="display:flex;flex-wrap:wrap;gap:16px;">
+      <div class="stats-grid">
         <% quickStats.forEach(item => { %>
-          <div style="flex:1 1 180px;min-width:180px;background:#ffffff;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,0.12);padding:18px 20px;">
-            <p style="margin:0;font-size:0.85rem;color:#4a4a4a;"> <%= item.label %> </p>
-            <p style="margin:6px 0 0;font-size:1.5rem;color:#013d37;font-weight:700;"> <%= item.value %> </p>
+          <div class="stat-card">
+            <p class="stat-card__label"><%= item.label %></p>
+            <p class="stat-card__value"><%= item.value %></p>
           </div>
         <% }) %>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:18px;">
+      <div class="card-grid">
         <% cards.forEach(card => { %>
-          <a href="<%= card.href %>" style="flex:1 1 240px;min-width:220px;background:#ffffff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.12);padding:24px 22px;text-decoration:none;color:#013d37;display:flex;flex-direction:column;gap:12px;transition:transform 0.2s ease;">
-            <h2 style="margin:0;font-size:1.3rem;"> <%= card.title %> </h2>
-            <p style="margin:0;color:#4a4a4a;font-size:0.95rem;line-height:1.5;"> <%= card.text %> </p>
-            <span style="margin-top:auto;font-weight:600;color:#017d71;">Open <span aria-hidden="true">→</span></span>
+          <a href="<%= card.href %>" class="card link-card">
+            <h2 class="card__title"><%= card.title %></h2>
+            <p class="card__text"><%= card.text %></p>
+            <span class="link-card__cta">Open <span aria-hidden="true">→</span></span>
           </a>
         <% }) %>
       </div>

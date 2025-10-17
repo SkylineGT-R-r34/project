@@ -1,91 +1,89 @@
 <%
   const eventsList = Array.isArray(events) ? events : [];
   const body = () => { %>
-    <section style="display:flex;flex-direction:column;gap:24px;">
+    <section class="page-section">
       <%- include('partials/pageHeader', { title: 'Events', subtitle: 'Search, filter, and manage happenings across campus.' }) %>
-      <div id="events-page" data-user-id="<%= typeof user_id !== 'undefined' ? user_id : (user && user.id) || '' %>" style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">
-        <div style="flex:1 1 420px;min-width:320px;background:#ffffff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Search events
-              <input type="search" id="event-search" placeholder="Search by title or description" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+      <div id="events-page" data-user-id="<%= typeof user_id !== 'undefined' ? user_id : (user && user.id) || '' %>" class="events-layout">
+        <div class="card card--spacious">
+          <div class="filter-bar">
+            <label class="form-field" for="event-search">
+              <span>Search events</span>
+              <input type="search" id="event-search" class="form-control" placeholder="Search by title or description" />
             </label>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;">
-              <label style="flex:1 1 140px;min-width:140px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
-                From
-                <input type="date" id="event-date-from" style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-              </label>
-              <label style="flex:1 1 140px;min-width:140px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
-                To
-                <input type="date" id="event-date-to" style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-              </label>
-            </div>
-            <label style="font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
-              Location
-              <input type="search" id="event-location" placeholder="All locations" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            <label class="form-field" for="event-date-from">
+              <span>From</span>
+              <input type="date" id="event-date-from" class="form-control" />
             </label>
-            <button id="event-clear-filters" type="button" style="align-self:flex-start;background:#017d71;color:#ffffff;border:none;padding:8px 14px;border-radius:16px;font-weight:600;">Clear filters</button>
+            <label class="form-field" for="event-date-to">
+              <span>To</span>
+              <input type="date" id="event-date-to" class="form-control" />
+            </label>
+            <label class="form-field" for="event-location">
+              <span>Location</span>
+              <input type="search" id="event-location" class="form-control" placeholder="All locations" />
+            </label>
+            <button id="event-clear-filters" type="button" class="btn btn-muted">Clear filters</button>
           </div>
           <div id="event-empty" <%= eventsList.length ? 'hidden' : '' %>>
             <%- include('partials/emptyState', { title: 'No events yet', message: 'Events you create or book will appear here. Use the form to add the first one.', ctaHref: '#event-form', ctaLabel: 'Create an event' }) %>
           </div>
-          <ul id="event-list" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;">
+          <ul id="event-list" class="event-list">
             <% eventsList.forEach(ev => { %>
-              <li data-event-id="<%= ev.id %>" style="background:#ffffff;border-radius:14px;border:1px solid rgba(1,125,113,0.18);box-shadow:0 8px 22px rgba(0,0,0,0.08);padding:16px 18px;display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-                  <h3 style="margin:0;font-size:1.1rem;color:#013d37;"> <%= ev.title %> </h3>
-                  <time datetime="<%= ev.event_date %>" style="font-size:0.85rem;color:#4a4a4a;">
+              <li data-event-id="<%= ev.id %>" class="event-card">
+                <div class="event-meta">
+                  <h3 class="card__title"><%= ev.title %></h3>
+                  <time datetime="<%= ev.event_date %>">
                     <%= ev.event_date ? new Date(ev.event_date).toLocaleDateString() : '' %>
                     <%= ev.event_time ? ` at ${ev.event_time}` : '' %>
                   </time>
                 </div>
-                <p style="margin:0;color:#4a4a4a;"> <%= ev.description %> </p>
-                <p style="margin:0;color:#013d37;font-weight:600;">Location: <%= ev.location %></p>
-                <div style="display:flex;gap:12px;">
-                  <button class="event-book" data-event-id="<%= ev.id %>" type="button" style="background:#017d71;color:#ffffff;border:none;padding:8px 14px;border-radius:16px;font-weight:600;">Book</button>
-                  <button class="event-delete" data-event-id="<%= ev.id %>" type="button" style="background:transparent;color:#b02a37;border:1px solid rgba(176,42,55,0.4);padding:8px 14px;border-radius:16px;font-weight:600;">Delete</button>
+                <p class="card__text"><%= ev.description %></p>
+                <p class="card__text card__text--emphasis">Location: <%= ev.location %></p>
+                <div class="event-actions">
+                  <button class="btn btn-primary event-book" data-event-id="<%= ev.id %>" type="button">Book</button>
+                  <button class="btn btn-outline event-delete" data-event-id="<%= ev.id %>" type="button">Delete</button>
                 </div>
               </li>
             <% }) %>
           </ul>
         </div>
-        <div id="event-form-card" style="flex:1 1 320px;min-width:300px;background:#ffffff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.12);padding:24px 22px;">
-          <h2 style="margin-top:0;color:#013d37;font-size:1.4rem;">Create or edit an event</h2>
-          <form id="event-form" data-validate style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card" id="event-form-card">
+          <h2 class="card__title">Create or edit an event</h2>
+          <form id="event-form" data-validate class="form-grid">
             <input type="hidden" id="event-id" name="id" />
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Title
-              <input type="text" id="event-title" name="title" required placeholder="Event name" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-            </label>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;">
-              <label style="flex:1 1 150px;min-width:150px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
-                Date
-                <input type="date" id="event-date" name="evDate" required style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-              </label>
-              <label style="flex:1 1 150px;min-width:150px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
-                Time
-                <input type="time" id="event-time" name="evTime" required style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-              </label>
+            <div class="form-field">
+              <label for="event-title">Title</label>
+              <input type="text" id="event-title" name="title" class="form-control" required placeholder="Event name" />
             </div>
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Location
-              <input type="text" id="event-location-input" name="location" required placeholder="Library" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-            </label>
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Type
-              <input type="text" id="event-type" name="type" placeholder="Workshop" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-            </label>
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Capacity
-              <input type="number" id="event-capacity" name="capacity" min="1" placeholder="30" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
-            </label>
-            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
-              Description
-              <textarea id="event-description" name="description" rows="4" placeholder="Share the key details" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);"></textarea>
-            </label>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-              <button type="submit" style="background:#017d71;color:#ffffff;border:none;padding:10px 18px;border-radius:16px;font-weight:600;">Save event</button>
-              <button type="button" id="event-form-reset" style="background:transparent;color:#017d71;border:1px solid rgba(1,125,113,0.35);padding:10px 18px;border-radius:16px;font-weight:600;">Reset</button>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="event-date">Date</label>
+                <input type="date" id="event-date" name="evDate" class="form-control" required />
+              </div>
+              <div class="form-field">
+                <label for="event-time">Time</label>
+                <input type="time" id="event-time" name="evTime" class="form-control" required />
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="event-location-input">Location</label>
+              <input type="text" id="event-location-input" name="location" class="form-control" required placeholder="Library" />
+            </div>
+            <div class="form-field">
+              <label for="event-type">Type</label>
+              <input type="text" id="event-type" name="type" class="form-control" placeholder="Workshop" />
+            </div>
+            <div class="form-field">
+              <label for="event-capacity">Capacity</label>
+              <input type="number" id="event-capacity" name="capacity" class="form-control" min="1" placeholder="30" />
+            </div>
+            <div class="form-field">
+              <label for="event-description">Description</label>
+              <textarea id="event-description" name="description" rows="4" class="form-control" placeholder="Share the key details"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save event</button>
+              <button type="button" id="event-form-reset" class="btn btn-outline">Reset</button>
             </div>
           </form>
         </div>

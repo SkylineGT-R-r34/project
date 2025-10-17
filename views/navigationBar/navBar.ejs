@@ -4,8 +4,8 @@
   const navLinks = [
     { label: 'Home', href: '/', match: '/' },
     { label: 'Dashboard', href: '/dashboard', match: '/dashboard' },
-    { label: 'Events', href: '/events/event', match: '/events/event' },
-    { label: 'Mood', href: '/moodTracking/moodTrackingPage', match: '/moodTracking/moodTrackingPage' },
+    { label: 'Events', href: '/events/event', match: '/events' },
+    { label: 'Mood', href: '/moodTracking/moodTrackingPage', match: '/moodTracking' },
     { label: 'Social', href: '/social', match: '/social' }
   ];
   const rawCurrentPath =
@@ -16,10 +16,10 @@
       : '';
   const activePath = rawCurrentPath || '/';
 %>
-<header class="site-header" style="background-color:#017d71;color:#ffffff;">
-  <div class="site-header__inner" style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;flex-wrap:wrap;gap:12px;">
-    <a href="/" class="site-brand" style="font-weight:700;font-size:1.25rem;color:#ffffff;">CampusWell</a>
-    <nav class="site-nav" aria-label="Primary navigation" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="/" class="site-brand">CampusWell</a>
+    <nav class="site-nav" aria-label="Primary navigation">
       <% navLinks.forEach(link => {
         const isActive =
           activePath === link.match ||
@@ -28,10 +28,10 @@
       %>
         <a
           href="<%= link.href %>"
+          data-nav-match="<%= link.match %>"
           data-path="<%= link.href %>"
           class="nav-link<%= isActive ? ' active' : '' %>"
           <%= isActive ? 'aria-current="page"' : '' %>
-          style="color:#ffffff;font-weight:500;padding-bottom:4px;border-bottom:<%= isActive ? '2px solid #ffffff' : '2px solid transparent' %>;"
         >
           <%= link.label %>
         </a>
@@ -39,11 +39,29 @@
       <% if (!isAuthenticated) { %>
         <% const loginActive = activePath === '/auth/login'; %>
         <% const registerActive = activePath === '/auth/register'; %>
-        <a href="/auth/login" data-path="/auth/login" class="nav-link" style="color:#ffffff;font-weight:500;padding-bottom:4px;border-bottom:<%= loginActive ? '2px solid #ffffff' : '2px solid transparent' %>;" <%= loginActive ? 'aria-current="page"' : '' %>>Login</a>
-        <a href="/auth/register" data-path="/auth/register" class="nav-link" style="color:#ffffff;font-weight:500;padding-bottom:4px;border-bottom:<%= registerActive ? '2px solid #ffffff' : '2px solid transparent' %>;" <%= registerActive ? 'aria-current="page"' : '' %>>Register</a>
+        <a
+          href="/auth/login"
+          data-nav-match="/auth/login"
+          data-path="/auth/login"
+          class="nav-link<%= loginActive ? ' active' : '' %>"
+          <%= loginActive ? 'aria-current="page"' : '' %>
+        >
+          Login
+        </a>
+        <a
+          href="/auth/register"
+          data-nav-match="/auth/register"
+          data-path="/auth/register"
+          class="nav-link<%= registerActive ? ' active' : '' %>"
+          <%= registerActive ? 'aria-current="page"' : '' %>
+        >
+          Register
+        </a>
       <% } else { %>
-        <span style="color:#e3f7f4;font-size:0.9rem;">Hi, <%= (user && (user.full_name || user.name)) || resolvedRole || 'Guest' %></span>
-        <a href="/logout" class="nav-link" style="color:#ffffff;font-weight:500;padding-bottom:4px;border-bottom:2px solid transparent;">Logout</a>
+        <span class="nav-link nav-link--static">
+          Hi, <%= (user && (user.full_name || user.name)) || resolvedRole || 'Guest' %>
+        </span>
+        <a href="/logout" class="nav-link" data-nav-match="/logout" data-path="/logout">Logout</a>
       <% } %>
     </nav>
   </div>
