@@ -1,5 +1,6 @@
 import express from "express";
 import debug from "debug";
+import { fileURLToPath } from "url";
 import * as server from "./config/server.js";
 import { homeRouter } from "./routes/home.js";
 import { moodTrackingRouter } from "./routes/moodTracking.js";
@@ -47,7 +48,14 @@ app.get("/test", (req, res) => {
 
 // Error handling and server startup
 server.errorHandling(app);
-export const runningServer = app.listen(server.port, () => {
-  console.log(`Example app listening on http://127.0.0.1:${server.port}`);
-  debug("testing");
-});
+
+const modulePath = fileURLToPath(import.meta.url);
+const isMainProcess = process.argv[1] === modulePath;
+
+export let runningServer;
+if (isMainProcess) {
+  runningServer = app.listen(server.port, () => {
+    console.log(`Example app listening on http://127.0.0.1:${server.port}`);
+    debug("testing");
+  });
+}
