@@ -1,49 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <title>
-    <%= title %>
-  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Dashboard' %></title>
   <link rel="stylesheet" href="/stylesheets/style.css">
-  <style>
-    section {
-      margin-bottom: 30px;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 5px 10px;
-      margin-top: 5px;
-      cursor: pointer;
-    }
-
-    input,
-    select {
-      margin-bottom: 10px;
-      padding: 5px;
-      width: 200px;
-    }
-    label {
-      display: block;
-    }
-  </style>
 </head>
-
-<body>
+<body data-page="Dashboard">
   <%- include('navigationBar/navBar') %>
-    <div class="main-content">
-      <h1>Welcome, <%= name %> (<%= role %>)</h1>
+
+  <div class="main-content">
+    <div class="picture">
+      <h1>Dashboard</h1>
+      <% if (user && user.full_name) { %>
+        <p>Welcome back, <%= user.full_name %>!</p>
+      <% } else { %>
+        <p>Your campus wellbeing at a glance.</p>
+      <% } %>
     </div>
+
+    <div class="search-container">
+      <input type="text" id="dashboard-search" placeholder="Search dashboard items">
+      <select id="dashboard-section">
+        <option value="">Jump to section</option>
+        <option value="dashboard-stats">Stats Overview</option>
+        <option value="dashboard-upcoming-events">Upcoming Events</option>
+        <option value="dashboard-recent-moods">Recent Moods</option>
+        <option value="dashboard-shortcuts">Shortcuts</option>
+      </select>
+      <button type="button" id="dashboard-go">Go</button>
+    </div>
+
+    <div class="events-container">
+      <div class="dashboard-content">
+        <%
+          const safeStats = stats || {};
+          const upcomingCount = typeof safeStats.upcomingEventsCount === 'number' ? safeStats.upcomingEventsCount : 0;
+          const moodStreak = typeof safeStats.moodStreakDays === 'number' ? safeStats.moodStreakDays : null;
+          const connectionsCount = typeof safeStats.connectionsCount === 'number' ? safeStats.connectionsCount : 0;
+          const profileMessage = safeStats.profileMessage || (user && user.full_name ? 'Profile is ready to review.' : 'Complete your profile.');
+
+          const formatDate = (value) => {
+            if (!value) return '';
+            const date = new Date(value);
+            if (!Number.isNaN(date.getTime())) {
+              return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+            return value;
+          };
+        %>
+
+        <section id="dashboard-stats" class="dashboard-section">
+          <h2>At a Glance</h2>
+          <div class="dashboard-grid">
+            <div class="dashboard-tile">
+              <h3>Upcoming Events</h3>
+              <p class="dashboard-tile-value"><%= upcomingCount %></p>
+              <p class="dashboard-tile-caption">Events on your calendar.</p>
+            </div>
+            <div class="dashboard-tile">
+              <h3>Mood Streak</h3>
+              <p class="dashboard-tile-value">
+                <%= moodStreak !== null ? moodStreak : 'Start tracking' %>
+              </p>
+              <p class="dashboard-tile-caption">Consecutive days logged.</p>
+            </div>
+            <div class="dashboard-tile">
+              <h3>Connections</h3>
+              <p class="dashboard-tile-value"><%= connectionsCount %></p>
+              <p class="dashboard-tile-caption">Friends in your circle.</p>
+            </div>
+            <div class="dashboard-tile">
+              <h3>Profile</h3>
+              <p class="dashboard-tile-value profile-message"><%= profileMessage %></p>
+              <p class="dashboard-tile-caption">Keep your details up to date.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="dashboard-upcoming-events" class="dashboard-section">
+          <h2>Upcoming Events</h2>
+          <% if (Array.isArray(recentEvents) && recentEvents.length) { %>
+            <ul class="dashboard-list" data-dashboard-list>
+              <% recentEvents.forEach(function(event) { %>
+                <% const eventDate = formatDate(event.date || event.event_date); %>
+                <li class="dashboard-card" data-item>
+                  <strong><%= event.title %></strong>
+                  <% if (eventDate) { %>
+                    <div class="dashboard-card-detail">Date: <%= eventDate %></div>
+                  <% } %>
+                  <% if (event.location) { %>
+                    <div class="dashboard-card-detail">Location: <%= event.location %></div>
+                  <% } %>
+                </li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <p class="dashboard-empty">No upcoming events yet. <a href="/events">Browse events</a>.</p>
+          <% } %>
+        </section>
+
+        <section id="dashboard-recent-moods" class="dashboard-section">
+          <h2>Recent Moods</h2>
+          <% if (Array.isArray(recentMoods) && recentMoods.length) { %>
+            <ul class="dashboard-list" data-dashboard-list>
+              <% recentMoods.forEach(function(mood) { %>
+                <% const moodDate = formatDate(mood.date || mood.created_at); %>
+                <li class="dashboard-card" data-item>
+                  <strong>Score: <%= mood.score %></strong>
+                  <% if (moodDate) { %>
+                    <div class="dashboard-card-detail">Logged on <%= moodDate %></div>
+                  <% } %>
+                  <% if (mood.notes) { %>
+                    <div class="dashboard-card-detail">"<%= mood.notes %>"</div>
+                  <% } %>
+                </li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <p class="dashboard-empty">No moods tracked yet. <a href="/mood">Start tracking your mood</a>.</p>
+          <% } %>
+        </section>
+
+        <section id="dashboard-shortcuts" class="dashboard-section">
+          <h2>Shortcuts</h2>
+          <div class="dashboard-shortcuts" data-dashboard-list>
+            <a class="dashboard-shortcut" data-item href="/events">Explore Events</a>
+            <a class="dashboard-shortcut" data-item href="/mood">Log a Mood</a>
+            <a class="dashboard-shortcut" data-item href="/social">Connect with Peers</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById('dashboard-search');
+      const sectionSelect = document.getElementById('dashboard-section');
+      const goButton = document.getElementById('dashboard-go');
+      const lists = document.querySelectorAll('[data-dashboard-list]');
+
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          const term = searchInput.value.trim().toLowerCase();
+          lists.forEach(list => {
+            list.querySelectorAll('[data-item]').forEach(item => {
+              const matches = !term || item.textContent.toLowerCase().includes(term);
+              item.style.display = matches ? '' : 'none';
+            });
+          });
+        });
+      }
+
+      if (goButton) {
+        goButton.addEventListener('click', () => {
+          const targetId = sectionSelect && sectionSelect.value;
+          if (!targetId) return;
+          const target = document.getElementById(targetId);
+          if (target && typeof target.scrollIntoView === 'function') {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      }
+    })();
+  </script>
+  <script src="/Script.js"></script>
 </body>
 </html>

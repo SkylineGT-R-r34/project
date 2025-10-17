@@ -422,3 +422,136 @@ gap: 20px;
   width: 300px;
   align-items: center;
 }
+/*############################## Dashboard Styles ##########################*/
+.dashboard-content {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0 auto 60px;
+}
+
+.dashboard-section {
+  background: #f8f8f8;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-section h2 {
+  margin: 0;
+  color: #017d71;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.dashboard-tile {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-tile h3 {
+  margin: 0;
+  color: #333333;
+}
+
+.dashboard-tile-value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #017d71;
+}
+
+.dashboard-tile-caption {
+  margin: 0;
+  color: #555555;
+  font-size: 0.95rem;
+}
+
+.dashboard-tile-value.profile-message {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.dashboard-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-card {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  color: #333333;
+}
+
+.dashboard-card strong {
+  color: #017d71;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.dashboard-card-detail {
+  color: #555555;
+  margin-top: 4px;
+}
+
+.dashboard-empty {
+  margin-top: 16px;
+  color: #555555;
+}
+
+.dashboard-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dashboard-shortcut {
+  flex: 1;
+  min-width: 160px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 10px;
+  text-align: center;
+  color: #017d71;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-shortcut:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    gap: 20px;
+  }
+
+  .dashboard-section {
+    padding: 16px;
+  }
+
+  .dashboard-tile-value {
+    font-size: 1.6rem;
+  }
+}
