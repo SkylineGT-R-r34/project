@@ -1,48 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
-  <link rel="stylesheet" href="/stylesheets/style.css">
-</head>
-<body data-page="Events">
-  <%- include('navigationBar/navBar') %>
-
-  <div class="main-content">
-    <div class="picture">
-      <h1>Events</h1>
-    </div>
-
-    <div class="search-container">
-      <input type="text" id="search" placeholder="Search by title">
-      
-      <select id="type">
-        <option value="">All Types</option>
-        <option value="Workshop">Workshop</option>
-        <option value="Orientation">Orientation</option>
-        <option value="Talk_Show">Talk Show</option>
-        <option value="graduation">Graduation</option>
-      </select>
-
-      <select id="location">
-        <option value="">All Locations</option>
-        <option value="Library">Library  </option>
-        <option value="Main Hall">Main Hall</option>
-        <option value="Auditorium">Auditorium</option>
-        <option value="Stadium">Stadium</option>
-      </select>
-
-      <input type="date" id="date">
-
-      <button id="searchBtn">Search</button>
-    </div>
-
-    <div class="events-container">
-      <ul id="eventList"></ul>
-    </div>
-  </div>
-
-  <script src="/Script.js"></script>
-</body>
-</html>
+<%
+  const eventsList = Array.isArray(events) ? events : [];
+  const body = () => { %>
+    <section style="display:flex;flex-direction:column;gap:24px;">
+      <%- include('partials/pageHeader', { title: 'Events', subtitle: 'Search, filter, and manage happenings across campus.' }) %>
+      <div id="events-page" data-user-id="<%= typeof user_id !== 'undefined' ? user_id : (user && user.id) || '' %>" style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">
+        <div style="flex:1 1 420px;min-width:320px;background:#ffffff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Search events
+              <input type="search" id="event-search" placeholder="Search by title or description" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            </label>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;">
+              <label style="flex:1 1 140px;min-width:140px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
+                From
+                <input type="date" id="event-date-from" style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+              </label>
+              <label style="flex:1 1 140px;min-width:140px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
+                To
+                <input type="date" id="event-date-to" style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+              </label>
+            </div>
+            <label style="font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
+              Location
+              <input type="search" id="event-location" placeholder="All locations" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            </label>
+            <button id="event-clear-filters" type="button" style="align-self:flex-start;background:#017d71;color:#ffffff;border:none;padding:8px 14px;border-radius:16px;font-weight:600;">Clear filters</button>
+          </div>
+          <div id="event-empty" <%= eventsList.length ? 'hidden' : '' %>>
+            <%- include('partials/emptyState', { title: 'No events yet', message: 'Events you create or book will appear here. Use the form to add the first one.', ctaHref: '#event-form', ctaLabel: 'Create an event' }) %>
+          </div>
+          <ul id="event-list" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;">
+            <% eventsList.forEach(ev => { %>
+              <li data-event-id="<%= ev.id %>" style="background:#ffffff;border-radius:14px;border:1px solid rgba(1,125,113,0.18);box-shadow:0 8px 22px rgba(0,0,0,0.08);padding:16px 18px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                  <h3 style="margin:0;font-size:1.1rem;color:#013d37;"> <%= ev.title %> </h3>
+                  <time datetime="<%= ev.event_date %>" style="font-size:0.85rem;color:#4a4a4a;">
+                    <%= ev.event_date ? new Date(ev.event_date).toLocaleDateString() : '' %>
+                    <%= ev.event_time ? ` at ${ev.event_time}` : '' %>
+                  </time>
+                </div>
+                <p style="margin:0;color:#4a4a4a;"> <%= ev.description %> </p>
+                <p style="margin:0;color:#013d37;font-weight:600;">Location: <%= ev.location %></p>
+                <div style="display:flex;gap:12px;">
+                  <button class="event-book" data-event-id="<%= ev.id %>" type="button" style="background:#017d71;color:#ffffff;border:none;padding:8px 14px;border-radius:16px;font-weight:600;">Book</button>
+                  <button class="event-delete" data-event-id="<%= ev.id %>" type="button" style="background:transparent;color:#b02a37;border:1px solid rgba(176,42,55,0.4);padding:8px 14px;border-radius:16px;font-weight:600;">Delete</button>
+                </div>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+        <div id="event-form-card" style="flex:1 1 320px;min-width:300px;background:#ffffff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.12);padding:24px 22px;">
+          <h2 style="margin-top:0;color:#013d37;font-size:1.4rem;">Create or edit an event</h2>
+          <form id="event-form" data-validate style="display:flex;flex-direction:column;gap:12px;">
+            <input type="hidden" id="event-id" name="id" />
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Title
+              <input type="text" id="event-title" name="title" required placeholder="Event name" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            </label>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;">
+              <label style="flex:1 1 150px;min-width:150px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
+                Date
+                <input type="date" id="event-date" name="evDate" required style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+              </label>
+              <label style="flex:1 1 150px;min-width:150px;font-weight:600;color:#013d37;display:flex;flex-direction:column;gap:6px;">
+                Time
+                <input type="time" id="event-time" name="evTime" required style="padding:10px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+              </label>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Location
+              <input type="text" id="event-location-input" name="location" required placeholder="Library" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Type
+              <input type="text" id="event-type" name="type" placeholder="Workshop" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Capacity
+              <input type="number" id="event-capacity" name="capacity" min="1" placeholder="30" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Description
+              <textarea id="event-description" name="description" rows="4" placeholder="Share the key details" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);"></textarea>
+            </label>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <button type="submit" style="background:#017d71;color:#ffffff;border:none;padding:10px 18px;border-radius:16px;font-weight:600;">Save event</button>
+              <button type="button" id="event-form-reset" style="background:transparent;color:#017d71;border:1px solid rgba(1,125,113,0.35);padding:10px 18px;border-radius:16px;font-weight:600;">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  <% }; %>
+<%- include('layouts/layout') %>

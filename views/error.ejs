@@ -1,44 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 50px;
-      background-color: #f8f8f8;
-      color: #333;
-    }
-    h1 {
-      font-size: 50px;
-      color: #ff0000;
-    }
-    p {
-      font-size: 20px;
-    }
-    .error-details {
-      margin-top: 20px;
-      font-size: 16px;
-      color: #888;
-    }
-    a {
-      text-decoration: none;
-      color: #007bff;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <h1>⚠️ <%= message %></h1>
-  <p>Oops! It looks like something went wrong.</p>
-  <div class="error-details">
-    <p>Status Code: <%= error.status %> - <%= error.message %></p>
-  </div>
-  <p>Stack:</p>
-  <pre><%= error.stack %></pre>
-</body>
-</html>
+<%
+  const isDev = error && error.stack;
+  const body = () => { %>
+    <section style="display:flex;flex-direction:column;gap:24px;max-width:720px;margin:0 auto;">
+      <%- include('partials/pageHeader', { title: message || 'Something went wrong', subtitle: 'We hit an unexpected snag while processing your request.' }) %>
+      <div style="background:#ffffff;padding:28px 26px;border-radius:18px;box-shadow:0 12px 32px rgba(0,0,0,0.12);display:flex;flex-direction:column;gap:14px;">
+        <p style="margin:0;color:#4a4a4a;">Status code: <strong><%= error && error.status ? error.status : 500 %></strong></p>
+        <p style="margin:0;color:#4a4a4a;">You can head back to the <a href="/" style="color:#017d71;">home page</a> or try the action again shortly.</p>
+        <% if (isDev) { %>
+          <details style="background:rgba(1,125,113,0.07);padding:16px;border-radius:12px;">
+            <summary style="font-weight:600;color:#013d37;cursor:pointer;">Developer details</summary>
+            <pre style="overflow:auto;white-space:pre-wrap;font-size:0.85rem;color:#333;margin-top:12px;"><%= error.stack %></pre>
+          </details>
+        <% } %>
+      </div>
+    </section>
+  <% }; %>
+<%- include('layouts/layout') %>

@@ -1,140 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register</title>
-
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #017d71; /* light green background */
-    }
-
-    .register {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 320px;
-      text-align: center;
-    }
-
-    form h2 {
-      margin-bottom: 10px;
-    }
-
-    input, select, button {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-      width: 100%;
-    }
-
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background-color: #218838;
-    }
-
-    .login-link {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
-    .login-link a {
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    .login-link a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="register">
-    <form id="registerForm" action="/auth/register" method="POST">
-      <h2>Create Account</h2>
-
-      <input type="text" name="fullName" placeholder="Full Name" required />
-      <input type="email" name="email" placeholder="Email" required />
-      <input type="password" name="password" placeholder="Password" required />
-
-      <button type="submit">Register</button>
-
-      <div class="login-link">
-        Already have an account? <a href="/auth/login">Login here</a>
-      </div>
-    </form>
-  </div>
-
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('registerForm');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // stop normal form submission
-
-    // Collect form data
-    const fullName = form.fullName.value.trim();
-    const email = form.email.value.trim();
-    const password = form.password.value.trim();
-    const role = 'student'; // default role
-
-    // Validate simple input
-    if (!fullName || !email || !password) {
-      alert('Please fill in all fields.');
-      return;
-    }
-
-    try {
-      // Send data to backend
-      const res = await fetch('/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ fullName, email, password, role })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert('✅ Registration successful!');
-        // Redirect to login page
-        window.location.href = '/auth/login';
-      } else {
-        alert('❌ ' + (data.message || 'Registration failed'));
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Something went wrong. Please try again later.');
-    }
-  });
-});
-</script>
-
-</body>
-</html>
+<%
+  const body = () => { %>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:18px;min-height:70vh;justify-content:center;">
+      <%- include('partials/pageHeader', { title: 'Register', subtitle: 'Create your CampusWell account to unlock events and wellbeing tools.' }) %>
+      <form id="registerForm" data-validate style="display:flex;flex-direction:column;gap:12px;background-color:#ffffff;padding:30px;border-radius:16px;box-shadow:0 10px 28px rgba(0,0,0,0.12);width:340px;">
+        <label for="register-name" style="display:flex;flex-direction:column;gap:6px;text-align:left;color:#013d37;font-weight:600;">
+          Full name
+          <input type="text" id="register-name" name="fullName" required placeholder="Jane Doe" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+        </label>
+        <label for="register-email" style="display:flex;flex-direction:column;gap:6px;text-align:left;color:#013d37;font-weight:600;">
+          Email
+          <input type="email" id="register-email" name="email" required placeholder="you@example.com" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+        </label>
+        <label for="register-password" style="display:flex;flex-direction:column;gap:6px;text-align:left;color:#013d37;font-weight:600;">
+          Password
+          <input type="password" id="register-password" name="password" required minlength="6" placeholder="Choose a password" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+        </label>
+        <button type="submit" style="background-color:#017d71;color:#ffffff;cursor:pointer;padding:10px;border-radius:10px;border:none;font-weight:600;">Register</button>
+        <p style="margin:0;text-align:center;font-size:0.9rem;">Already have an account? <a href="/auth/login" style="color:#017d71;">Login here</a></p>
+      </form>
+    </div>
+  <% }; %>
+<%- include('layouts/layout') %>

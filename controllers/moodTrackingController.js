@@ -11,11 +11,14 @@ export const index = async (req, res) => {
       [user.id]
     );
 
+    const resolvedPath = req.baseUrl
+      ? `${req.baseUrl}${req.path === '/' ? '' : req.path}`
+      : req.path;
     res.render('moodTrackingUI', {
       title: 'Mood Tracking Page',
       user,
       moods: moodsResult.rows,
-      currentPath: req.path,
+      currentPath: resolvedPath,
       role: user.role  // pass role to EJS
     });
   } catch (err) {

@@ -1,67 +1,96 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-  <title>Mood Tracker</title>
-  <link rel='stylesheet' href='/stylesheets/style.css' />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
-<body data-page="MoodTracking">
-  <%- include('navigationBar/navBar') %>
-
-  <div class="main-content">
-    <div class="left-side">
-      <h1>Your Mood Status</h1>
-      <ul id="mood-list"></ul>
-    </div>
-
-    <div class="right-side">
-      <h1>Log Your Mood</h1>
-      <div class="mood-form-container">
-        <div class="user-picture">
-          <img src="#" alt="User">
-          <h3><%= user.name %></h3>
-        </div>
-
-        <form id="moodForm">
-          <input type="hidden" id="user_id" value="<%= user.id %>">
-          <div>
-            <label style="color:#017d71;font-weight:bold;">Score:</label><br>
-            <input type="number" name="score" min="1" max="10" placeholder="1-10" required
-              style="width:70px;height:50px;border-radius:10px;border-color:#017d71;">
+<%
+  const moodEntries = Array.isArray(moods) ? moods : [];
+  let totalScore = 0;
+  const dateSet = new Set();
+  moodEntries.forEach(entry => {
+    const scoreValue = Number(entry.score ?? entry.mood_score ?? 0);
+    totalScore += Number.isNaN(scoreValue) ? 0 : scoreValue;
+    const rawDate = entry.created_at || entry.date;
+    if (rawDate) {
+      const parsed = new Date(rawDate);
+      if (!Number.isNaN(parsed.getTime())) {
+        const normalized = new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate()));
+        dateSet.add(normalized.toISOString().split('T')[0]);
+      }
+    }
+  });
+  const averageScore = moodEntries.length ? (totalScore / moodEntries.length).toFixed(1) : null;
+  let streakDays = 0;
+  if (dateSet.size) {
+    const today = new Date();
+    const cursor = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    let cursorKey = cursor.toISOString().split('T')[0];
+    while (dateSet.has(cursorKey)) {
+      streakDays += 1;
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+      cursorKey = cursor.toISOString().split('T')[0];
+    }
+  }
+  const body = () => { %>
+    <section style="display:flex;flex-direction:column;gap:24px;">
+      <%- include('partials/pageHeader', { title: 'Mood tracking', subtitle: 'Log your feelings, add short notes, and review recent entries.' }) %>
+      <div id="mood-tracking" data-user-id="<%= user ? user.id : '' %>" style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">
+        <div style="flex:1 1 320px;min-width:280px;background:#ffffff;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
+          <h2 style="margin:0;color:#013d37;font-size:1.3rem;">Log today’s mood</h2>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <% [1,2,3,4,5,6,7,8,9,10].forEach(score => { %>
+              <button type="button" class="mood-score" data-score="<%= score %>" style="flex:1 1 48px;min-width:48px;padding:10px;border-radius:12px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;"> <%= score %> </button>
+            <% }) %>
           </div>
-          <div class="notes-input">
-            <label style="color:#017d71;font-weight:bold;">Notes:</label><br>
-            <input type="text" name="notes" placeholder="How are you feeling?" required
-              style="width:300px;height:50px;border-radius:20px;border-color:#017d71;">
-          </div>
-          <button type="submit" class="mood-submit">Add Mood</button>
-        </form>
-      </div>
-
-      <div class="graph_seek">
-        <div class="mood-graph">
-          <h1 style="color:#017d71;margin-top:60px;">Mood Graph</h1>
-          <canvas id="moodChart"></canvas>
-        </div>
-
-        <div class="seek">
-          <h1 style="color:#017d71;margin-top:60px;">Seek Help</h1>
-          <h2>University Student Support</h2>
-          <p>If you are feeling stressed, anxious, or low, we are here to help.</p>
-          <form id="helpForm">
-            <input type="hidden" name="user_id" value="<%= user.id %>">
-            <textarea name="message" placeholder="Do you need any help from us?" required
-              style="width:100%;height:60px;"></textarea>
-            <button type="submit" class="mood-submit">Send Help Request</button>
+          <form id="mood-form" data-validate style="display:flex;flex-direction:column;gap:12px;">
+            <input type="hidden" name="user_id" value="<%= user ? user.id : '' %>" />
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Selected score
+              <input type="number" id="mood-score" name="score" min="1" max="10" required style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-weight:600;color:#013d37;">
+              Notes
+              <textarea id="mood-notes" name="notes" rows="3" placeholder="How are you feeling today?" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(1,125,113,0.35);"></textarea>
+            </label>
+            <button type="submit" style="background:#017d71;color:#ffffff;border:none;padding:10px 18px;border-radius:16px;font-weight:600;">Save mood</button>
           </form>
+          <div style="background:rgba(1,125,113,0.07);padding:16px;border-radius:14px;display:flex;flex-direction:column;gap:6px;">
+            <p style="margin:0;color:#013d37;font-weight:600;">Tracking summary</p>
+            <p id="mood-summary-count" style="margin:0;color:#4a4a4a;">Entries logged: <%= moodEntries.length %></p>
+            <p id="mood-summary-streak" style="margin:0;color:#4a4a4a;">Current streak: <%= streakDays %> day<%= streakDays === 1 ? '' : 's' %></p>
+            <p id="mood-summary-average" style="margin:0;color:#4a4a4a;">Average score: <%= averageScore ?? '—' %></p>
+          </div>
+        </div>
+        <div style="flex:1 1 420px;min-width:320px;background:#ffffff;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,0.12);padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+            <h2 style="margin:0;color:#013d37;font-size:1.3rem;flex:1 1 auto;">Mood history</h2>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="mood-range" data-range="7" style="padding:8px 14px;border-radius:16px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;">7 days</button>
+              <button type="button" class="mood-range" data-range="30" style="padding:8px 14px;border-radius:16px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;">30 days</button>
+              <button type="button" class="mood-range" data-range="90" style="padding:8px 14px;border-radius:16px;border:1px solid rgba(1,125,113,0.35);background:#ffffff;color:#013d37;font-weight:600;">90 days</button>
+            </div>
+          </div>
+          <div id="mood-empty" <%= moodEntries.length ? 'hidden' : '' %>>
+            <%- include('partials/emptyState', { title: 'No moods logged', message: 'Log your first mood to build your wellbeing timeline.', ctaHref: '#mood-form', ctaLabel: 'Log a mood' }) %>
+          </div>
+          <div style="overflow-x:auto;">
+            <table id="mood-table" style="width:100%;border-collapse:collapse;min-width:320px;">
+              <thead>
+                <tr style="background:rgba(1,125,113,0.08);color:#013d37;">
+                  <th style="text-align:left;padding:10px 12px;">Date</th>
+                  <th style="text-align:left;padding:10px 12px;">Score</th>
+                  <th style="text-align:left;padding:10px 12px;">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% moodEntries.forEach(entry => { %>
+                  <tr>
+                    <td style="padding:10px 12px;border-bottom:1px solid rgba(1,125,113,0.15);"><%= (entry.created_at || entry.date) ? new Date(entry.created_at || entry.date).toLocaleString() : '—' %></td>
+                    <td style="padding:10px 12px;border-bottom:1px solid rgba(1,125,113,0.15);font-weight:600;color:#013d37;"><%= entry.score ?? entry.mood_score %></td>
+                    <td style="padding:10px 12px;border-bottom:1px solid rgba(1,125,113,0.15);"><%= entry.notes || entry.note || '—' %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <canvas id="mood-chart" height="160" style="margin-top:12px;background:#f8fffd;border-radius:14px;" aria-hidden="true"></canvas>
         </div>
       </div>
-    </div>
-  </div>
-
-  <script src="/Script.js"></script>
-</body>
-
-</html>
+    </section>
+  <% }; %>
+<%- include('layouts/layout') %>

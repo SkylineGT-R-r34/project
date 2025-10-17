@@ -1,43 +1,41 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <div class="main-content">
-<div style="
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: #017d71;
-  color: white;
-  text-align: center;
-  padding: 12px 0;
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  z-index: 1000;
-">
-  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Home</a> |
-  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Mood Track</a> |
-  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Event</a> |
-  <a href="/auth/login" style="color: white; text-decoration: none; margin: 0 15px;">Find Friend</a>
-
-  <!-- Login button top-right -->
-  <a href="/auth/login" style="
-    position: absolute;
-    top: 5px;
-    right: 100px;
-    background-color: #28a745;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-  ">Login</a>
-</div>
-<h1><%= title %></h1>
-    </div>
-  </body>
-</html>
+<%
+  const featureCards = [
+    {
+      title: 'Track your wellbeing',
+      text: 'Keep tabs on your daily mood and reflect on helpful notes to spot trends early.',
+      href: '/moodTracking/moodTrackingPage',
+      label: 'Open mood tracker'
+    },
+    {
+      title: 'Discover campus events',
+      text: 'Browse workshops, talks, and socials curated for your community.',
+      href: '/events/event',
+      label: 'Explore events'
+    },
+    {
+      title: 'Connect with peers',
+      text: 'Find classmates, grow your network, and support each other.',
+      href: '/social',
+      label: 'Visit social hub'
+    }
+  ];
+  const body = () => { %>
+    <section style="display:flex;flex-direction:column;gap:32px;">
+      <%- include('partials/pageHeader', { title: title || 'CampusWell', subtitle: 'Your campus wellbeing companion in one friendly hub.' }) %>
+      <div style="background:#ffffff;border-radius:18px;box-shadow:0 12px 32px rgba(0,0,0,0.12);padding:32px 28px;display:flex;flex-direction:column;gap:18px;">
+        <p style="margin:0;color:#333;font-size:1rem;line-height:1.6;">
+          CampusWell helps you stay grounded with simple tools for logging moods, signing up for events, and keeping in touch with your support circle.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;">
+          <% featureCards.forEach(card => { %>
+            <div style="flex:1 1 220px;background:rgba(1,125,113,0.06);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:220px;">
+              <h2 style="margin:0;color:#013d37;font-size:1.2rem;"> <%= card.title %> </h2>
+              <p style="margin:0;color:#4a4a4a;font-size:0.95rem;line-height:1.5;"> <%= card.text %> </p>
+              <a href="<%= card.href %>" style="align-self:flex-start;padding:8px 16px;background-color:#017d71;color:#ffffff;border-radius:18px;font-size:0.9rem;"> <%= card.label %> </a>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+  <% }; %>
+<%- include('layouts/layout') %>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title || 'CampusWell' %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+  <body>
+    <a
+      href="#main-content"
+      class="skip-link"
+      style="position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;background:#017d71;color:#ffffff;border-radius:12px;text-decoration:none;"
+      onfocus="this.style.left='16px';this.style.top='16px';this.style.width='auto';this.style.height='auto';this.style.padding='8px 12px';"
+      onblur="this.style.left='-999px';this.style.width='1px';this.style.height='1px';this.style.padding='0';"
+    >Skip to content</a>
+    <%- include('../navigationBar/navBar') %>
+    <div class="layout-shell" style="min-height:100vh;background:#f5f5f5;">
+      <%- include('../partials/flash') %>
+      <main id="main-content" style="padding:40px 20px;max-width:1200px;margin:0 auto;">
+        <% if (typeof body === 'function') { %>
+          <% body(); %>
+        <% } else if (typeof body !== 'undefined') { %>
+          <%- body %>
+        <% } %>
+      </main>
+    </div>
+    <footer style="text-align:center;padding:20px 10px;font-size:0.85rem;color:#333;background:#ffffff;border-top:1px solid rgba(0,0,0,0.08);">
+      &copy; <%= new Date().getFullYear() %> CampusWell. All rights reserved.
+    </footer>
+    <script src="/Script.js" defer></script>
+  </body>
+</html>

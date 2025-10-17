@@ -1,4 +1,3 @@
-import createError from 'http-errors';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import express from 'express';
@@ -36,12 +35,13 @@ export function setup (app) {
  * @param {Object} app - The Express app object.
  */
 export function errorHandling(app) {
-    // catch 404 and forward to error handler
-    app.use((req, res, next) => {
-        next(createError(404));
+    // catch 404 and render not-found page
+    app.use((req, res) => {
+        res.status(404);
+        res.render('notFound', { title: 'Page not found' });
     });
 
-    // Default Error handler 
+    // Default Error handler
     app.use((err, req, res, next) => {
         // Set locals, only providing error details in development
         res.locals.message = err.message;

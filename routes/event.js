@@ -5,11 +5,14 @@ export const eventRouter = express.Router();
 // Render events page
 
 eventRouter.get('/event',authenticateToken,(req, res) => {
-  const role = req.user?.role || 'student'; 
+  const role = req.user?.role || 'student';
+  const resolvedPath = req.baseUrl
+    ? `${req.baseUrl}${req.path === '/' ? '' : req.path}`
+    : req.path;
   res.render('event', {
     title: 'Events',
-    role: req.user.role,      
-    currentPath: req.path,
+    role: req.user.role,
+    currentPath: resolvedPath,
     user_id: req.user.id
   });
 });
