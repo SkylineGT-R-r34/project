@@ -1,237 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title><%= title %></title>
+  <title>
+    <%= title %>
+  </title>
   <link rel="stylesheet" href="/stylesheets/style.css">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    section { margin-bottom: 30px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
-    h2 { margin-top: 0; }
-    ul { list-style: none; padding: 0; }
-    li { margin-bottom: 10px; }
-    button { padding: 5px 10px; margin-top: 5px; cursor: pointer; }
-    input, select { margin-bottom: 10px; padding: 5px; width: 200px; }
-    label { display: block; margin-top: 5px; }
+    section {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 5px 10px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+
+    input,
+    select {
+      margin-bottom: 10px;
+      padding: 5px;
+      width: 200px;
+    }
+    label {
+      display: block;
+    }
   </style>
 </head>
+
 <body>
-    <%- include('navigationBar/navBar') %>
-  <div class="main-content">
-  <h1>Welcome, <%= name %> (<%= role %>)</h1>
-
-  <!-- ================= STUDENT ================= -->
-  <% if (role === 'student') { %>
-    <section id="moodSection">
-      <h2>Your Current Mood</h2>
-      <p id="currentMood">Loading...</p>
-    </section>
-
-    <section id="alertSection">
-      <h2>Recent Alert</h2>
-      <p id="recentAlert">Loading...</p>
-    </section>
-
-    <section id="eventsSection">
-      <h2>Your Booked Events</h2>
-      <div>
-        <input type="text" id="search" placeholder="Search events" />
-        <select id="type">
-          <option value="">All Types</option>
-          <option value="Orientation">Orientation</option>
-          <option value="Workshop">Workshop</option>
-        </select>
-        <select id="location">
-          <option value="">All Locations</option>
-          <option value="Main Hall">Main Hall</option>
-          <option value="Library Room 101">Library Room 101</option>
-        </select>
-        <input type="date" id="date" />
-        <button id="searchBtn">Search</button>
-      </div>
-      <ul id="eventList"></ul>
-    </section>
-  <% } %>
-
-  <!-- ================= STAFF ================= -->
-  <% if (role === 'staff') { %>
-    <section id="alertStatsSection">
-      <h2>Alert Stats</h2>
-      <ul id="alertStats">Loading...</ul>
-    </section>
-
-    <section id="eventBookingsSection">
-      <h2>Event Bookings</h2>
-      <ul id="eventBookings">Loading...</ul>
-    </section>
-
-    <section id="staffDetailsSection">
-      <h2>Staff Details</h2>
-      <ul id="staffDetails">Loading...</ul>
-    </section>
-  <% } %>
-
-  <!-- ================= CHANGE PASSWORD ================= -->
-  <section id="changePasswordSection">
-    <h2>Change Password</h2>
-    <form id="changePasswordForm">
-      <label for="oldPassword">Old Password:</label>
-      <input type="password" id="oldPassword" name="oldPassword" required>
-
-      <label for="newPassword">New Password:</label>
-      <input type="password" id="newPassword" name="newPassword" required>
-
-      <label for="confirmPassword">Confirm New Password:</label>
-      <input type="password" id="confirmPassword" name="confirmPassword" required>
-
-      <button type="submit">Update Password</button>
-    </form>
-    <p id="passwordMessage" style="color: green;"></p>
-  </section>
-</div>
-<script>
-  const role = "<%= role %>";
-  const userId = "<%= user_id %>";
-
-  // ================= STUDENT =================
-  if (role === 'student') {
-    // Current Mood
-    fetch('/dashboard/currentMood', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        const mood = data.currentMood;
-        document.getElementById('currentMood').innerText = mood ? `Score: ${mood.score}, Notes: ${mood.notes}` : 'No mood recorded';
-      });
-
-    // Recent Alert
-    fetch('/dashboard/recentAlert', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        const alert = data.recentAlert;
-        document.getElementById('recentAlert').innerText = alert ? alert.message : 'No alerts';
-      });
-
-    // Events (only booked)
-    const eventList = document.getElementById('eventList');
-    const searchInput = document.getElementById('search');
-    const searchBtn = document.getElementById('searchBtn');
-    const typeSelect = document.getElementById('type');
-    const locationSelect = document.getElementById('location');
-    const dateInput = document.getElementById('date');
-
-    let bookedEvents = [];
-
-    async function fetchBookedEvents() {
-  try {
-    const res = await fetch('/dashboard/myBookings', { credentials: 'include' });
-    if (res.status === 401) { window.location.href = '/auth/login'; return []; }
-    const data = await res.json();
-    return data.bookedEvents || []; // <-- extract the array
-  } catch(err) {
-    console.error(err);
-    return [];
-  }
-}
-
-    function filterEvents() {
-      const search = searchInput.value.toLowerCase().trim();
-      const type = typeSelect.value.toLowerCase().trim();
-      const location = locationSelect.value.toLowerCase().trim();
-      const date = dateInput.value;
-
-      return bookedEvents.filter(ev => {
-        const eventDate = ev.event_date.slice(0, 10);
-        return (
-          (!search || ev.title.toLowerCase().includes(search)) &&
-          (!type || ev.type.toLowerCase().includes(type)) &&
-          (!location || ev.location.toLowerCase().includes(location)) &&
-          (!date || eventDate === date)
-        );
-      });
-    }
-
-    function renderEvents(events) {
-      eventList.innerHTML = '';
-      if (!events.length) { eventList.innerHTML = '<li>No booked events</li>'; return; }
-      events.forEach(ev => {
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>${ev.title}</strong> - ${ev.type} at ${ev.location} on ${ev.event_date.slice(0,10)} ${ev.event_time}`;
-        eventList.appendChild(li);
-      });
-    }
-
-    async function initEvents() {
-      bookedEvents = await fetchBookedEvents();
-      renderEvents(bookedEvents);
-      searchBtn.addEventListener('click', () => renderEvents(filterEvents()));
-    }
-
-    initEvents();
-  }
-
-  // ================= STAFF =================
-  if (role === 'staff') {
-    fetch('/dashboard/alertStats', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        const ul = document.getElementById('alertStats');
-        ul.innerHTML = data.alertStats.map(stat => `<li>User ${stat.user_id}: ${stat.help_count} help alerts</li>`).join('');
-      });
-
-    fetch('/dashboard/eventBookings', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        const ul = document.getElementById('eventBookings');
-        ul.innerHTML = data.eventBookings.map(b => `<li>${b.student_name} booked ${b.event_title} - ${b.status}</li>`).join('');
-      });
-
-    fetch('/dashboard/staffDetails', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        const ul = document.getElementById('staffDetails');
-        ul.innerHTML = data.staffDetails.map(s => `<li>${s.full_name} - ${s.email}</li>`).join('');
-      });
-  }
-
-  // ================= CHANGE PASSWORD =================
-  const passwordForm = document.getElementById('changePasswordForm');
-  const passwordMessage = document.getElementById('passwordMessage');
-
-  passwordForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    const oldPassword = document.getElementById('oldPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    if (newPassword !== confirmPassword) {
-      passwordMessage.style.color = 'red';
-      passwordMessage.innerText = 'New passwords do not match!';
-      return;
-    }
-
-    try {
-      const res = await fetch('/dashboard/changePassword', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ oldPassword, newPassword })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        passwordMessage.style.color = 'red';
-        passwordMessage.innerText = data.message || 'Error changing password';
-      } else {
-        passwordMessage.style.color = 'green';
-        passwordMessage.innerText = 'Password updated successfully!';
-        passwordForm.reset();
-      }
-    } catch (err) {
-      console.error(err);
-      passwordMessage.style.color = 'red';
-      passwordMessage.innerText = 'Network error';
-    }
-  });
-
-</script>
+  <%- include('navigationBar/navBar') %>
+    <div class="main-content">
+      <h1>Welcome, <%= name %> (<%= role %>)</h1>
+    </div>
 </body>
 </html>

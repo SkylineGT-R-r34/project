@@ -32,7 +32,7 @@ eventRouter.get("/", authenticateToken,async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-eventRouter.post("/", async (req, res) => {
+eventRouter.post("/",authenticateToken, async (req, res) => {
   try {
     const { title, description, evDate, evTime, location, type, capacity } =
       req.body;

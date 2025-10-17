@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export function authenticateToken(req, res, next) {
-  const token = req.cookies?.token; // ✅ JWT comes from cookie
+  const token = req.cookies?.token; //  JWT comes from cookie
 
   if (!token) return res.redirect('/auth/login');
 
