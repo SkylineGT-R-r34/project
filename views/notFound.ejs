@@ -1,8 +1,0 @@
-<%
-  const body = () => { %>
-    <section class="page-section page-section--narrow">
-      <%- include('partials/pageHeader', { title: 'Page not found', subtitle: 'The page you were looking for has moved or never existed.' }) %>
-      <%- include('partials/emptyState', { title: 'We can’t find that page', message: 'Double-check the address or head back to your dashboard to continue exploring.', ctaHref: (user && user.id) ? '/dashboard' : '/', ctaLabel: (user && user.id) ? 'Go to dashboard' : 'Return home' }) %>
-    </section>
-  <% }; %>
-<%- include('layouts/layout') %>

@@ -1,93 +1,48 @@
-<%
-  const eventsList = Array.isArray(events) ? events : [];
-  const body = () => { %>
-    <section class="page-section">
-      <%- include('partials/pageHeader', { title: 'Events', subtitle: 'Search, filter, and manage happenings across campus.' }) %>
-      <div id="events-page" data-user-id="<%= typeof user_id !== 'undefined' ? user_id : (user && user.id) || '' %>" class="events-layout">
-        <div class="card card--spacious">
-          <div class="filter-bar">
-            <label class="form-field" for="event-search">
-              <span>Search events</span>
-              <input type="search" id="event-search" class="form-control" placeholder="Search by title or description" />
-            </label>
-            <label class="form-field" for="event-date-from">
-              <span>From</span>
-              <input type="date" id="event-date-from" class="form-control" />
-            </label>
-            <label class="form-field" for="event-date-to">
-              <span>To</span>
-              <input type="date" id="event-date-to" class="form-control" />
-            </label>
-            <label class="form-field" for="event-location">
-              <span>Location</span>
-              <input type="search" id="event-location" class="form-control" placeholder="All locations" />
-            </label>
-            <button id="event-clear-filters" type="button" class="btn btn-muted">Clear filters</button>
-          </div>
-          <div id="event-empty" <%= eventsList.length ? 'hidden' : '' %>>
-            <%- include('partials/emptyState', { title: 'No events yet', message: 'Events you create or book will appear here. Use the form to add the first one.', ctaHref: '#event-form', ctaLabel: 'Create an event' }) %>
-          </div>
-          <ul id="event-list" class="event-list">
-            <% eventsList.forEach(ev => { %>
-              <li data-event-id="<%= ev.id %>" class="event-card">
-                <div class="event-meta">
-                  <h3 class="card__title"><%= ev.title %></h3>
-                  <time datetime="<%= ev.event_date %>">
-                    <%= ev.event_date ? new Date(ev.event_date).toLocaleDateString() : '' %>
-                    <%= ev.event_time ? ` at ${ev.event_time}` : '' %>
-                  </time>
-                </div>
-                <p class="card__text"><%= ev.description %></p>
-                <p class="card__text card__text--emphasis">Location: <%= ev.location %></p>
-                <div class="event-actions">
-                  <button class="btn btn-primary event-book" data-event-id="<%= ev.id %>" type="button">Book</button>
-                  <button class="btn btn-outline event-delete" data-event-id="<%= ev.id %>" type="button">Delete</button>
-                </div>
-              </li>
-            <% }) %>
-          </ul>
-        </div>
-        <div class="card" id="event-form-card">
-          <h2 class="card__title">Create or edit an event</h2>
-          <form id="event-form" data-validate class="form-grid">
-            <input type="hidden" id="event-id" name="id" />
-            <div class="form-field">
-              <label for="event-title">Title</label>
-              <input type="text" id="event-title" name="title" class="form-control" required placeholder="Event name" />
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label for="event-date">Date</label>
-                <input type="date" id="event-date" name="evDate" class="form-control" required />
-              </div>
-              <div class="form-field">
-                <label for="event-time">Time</label>
-                <input type="time" id="event-time" name="evTime" class="form-control" required />
-              </div>
-            </div>
-            <div class="form-field">
-              <label for="event-location-input">Location</label>
-              <input type="text" id="event-location-input" name="location" class="form-control" required placeholder="Library" />
-            </div>
-            <div class="form-field">
-              <label for="event-type">Type</label>
-              <input type="text" id="event-type" name="type" class="form-control" placeholder="Workshop" />
-            </div>
-            <div class="form-field">
-              <label for="event-capacity">Capacity</label>
-              <input type="number" id="event-capacity" name="capacity" class="form-control" min="1" placeholder="30" />
-            </div>
-            <div class="form-field">
-              <label for="event-description">Description</label>
-              <textarea id="event-description" name="description" rows="4" class="form-control" placeholder="Share the key details"></textarea>
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Save event</button>
-              <button type="button" id="event-form-reset" class="btn btn-outline">Reset</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  <% }; %>
-<%- include('layouts/layout') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body data-page="Events">
+  <%- include('navigationBar/navBar') %>
+
+  <div class="main-content">
+    <div class="picture">
+      <h1>Events</h1>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Search by title">
+      
+      <select id="type">
+        <option value="">All Types</option>
+        <option value="Workshop">Workshop</option>
+        <option value="Orientation">Orientation</option>
+        <option value="Talk_Show">Talk Show</option>
+        <option value="graduation">Graduation</option>
+      </select>
+
+      <select id="location">
+        <option value="">All Locations</option>
+        <option value="Library">Library  </option>
+        <option value="Main Hall">Main Hall</option>
+        <option value="Auditorium">Auditorium</option>
+        <option value="Stadium">Stadium</option>
+      </select>
+
+      <input type="date" id="date">
+
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <div class="events-container">
+      <ul id="eventList"></ul>
+    </div>
+  </div>
+
+  <script src="/Script.js"></script>
+</body>
+</html>

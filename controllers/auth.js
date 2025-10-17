@@ -41,7 +41,7 @@ export async function register(req, res) {
     const user = normalizeUser(insert.rows[0]);
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, ensureSecret(), { expiresIn: TOKEN_EXPIRY });
 
-    //  Set token cookie
+    // ✅ Set token cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: false, // set true if using HTTPS
