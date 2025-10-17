@@ -27,7 +27,9 @@ app.set("view engine", "ejs");
 
 // Track current path for active highlighting in nav bar
 app.use((req, res, next) => {
-  res.locals.currentPath = req.path;
+  const fullPath = `${req.baseUrl || ''}${req.path || ''}`;
+  const normalized = fullPath.replace(/\/+$/, '') || '/';
+  res.locals.currentPath = normalized;
   next();
 });
 

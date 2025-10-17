@@ -8,32 +8,32 @@
   <ul>
     <% if (role === 'student') { %>
       <li>
-        <a href="/dashboard" class="<%= currentPath === '/' ? 'active' : '' %>">
+        <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">
           <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
         </a>
       </li>
       <li>
-        <a href="/moodTracking/moodTrackingPage" class="<%= currentPath === '/moodTracking/moodTrackingPage' ? 'active' : '' %>">
+        <a href="/moodTracking/moodTrackingPage" class="<%= currentPath.startsWith('/moodTracking') ? 'active' : '' %>">
           <img src="/image/mood.png" class="sidebar-icon"> Mood Tracker
         </a>
       </li>
       <li>
-        <a href="/events/event" class="<%= currentPath === '/events/event' ? 'active' : '' %>">
+        <a href="/events/event" class="<%= currentPath.startsWith('/events') ? 'active' : '' %>">
           <img src="/image/search.png" class="sidebar-icon"> Search & Discovery
         </a>
       </li>
       <li>
-        <a href="/social/social" class="<%= currentPath === '/profile' ? 'active' : '' %>">
+        <a href="/social/social" class="<%= currentPath.startsWith('/social') ? 'active' : '' %>">
           <img src="/image/social.png" class="sidebar-icon"> Social Networking
         </a>
       </li>
       <li>
-        <a href="#" class="<%= currentPath === '/gamification' ? 'active' : '' %>">
+        <a href="#" class="<%= currentPath.startsWith('/gamification') ? 'active' : '' %>">
           <img src="/image/gamification.png" class="sidebar-icon"> Gamification
         </a>
       </li>
       <li>
-        <a href="#" class="<%= currentPath === '/alerts' ? 'active' : '' %>">
+        <a href="#" class="<%= currentPath.startsWith('/alerts') ? 'active' : '' %>">
           <img src="/image/danger.png" class="sidebar-icon"> Alerts
         </a>
       </li>
@@ -45,12 +45,12 @@
     <% } else if (role === 'staff') { %>
       <h3 style="text-align: center;color: white;">Staff</h3>
       <li>
-        <a href="/dashboard" class="<%= currentPath === '/' ? 'active' : '' %>">
+        <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">
           <img src="/image/dashboard.png" class="sidebar-icon"> Dashboard
         </a>
       </li>
       <li>
-        <a href="#" class="<%= currentPath === '/alerts' ? 'active' : '' %>">
+        <a href="#" class="<%= currentPath.startsWith('/alerts') ? 'active' : '' %>">
           <img src="/image/danger.png" class="sidebar-icon"> Alerts
         </a>
       </li>

@@ -1,191 +1,106 @@
-    import express from 'express';
-    import pool from '../db/db.js';
-    import { authenticateToken } from '../middleware/auth.js';
+import express from 'express';
+import pool from '../db/db.js';
+import { authenticateToken } from '../middleware/auth.js';
 
-    export const dashboardRouter = express.Router();
+export const dashboardRouter = express.Router();
 
-    dashboardRouter.get('/', authenticateToken, async (req, res) => {
-    const parseDate = (value) => {
-        if (!value) {
-        return null;
-        }
-        const date = new Date(`${value}T00:00:00Z`);
-        return Number.isNaN(date.getTime()) ? null : date;
-    };
+dashboardRouter.get('/', authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.redirect('/auth/login');
+    }
 
-    const formatDate = (date) => {
-        const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-        return utcDate.toISOString().split('T')[0];
-    };
-
-    try {
-        const fromParam = parseDate(req.query.from);
-        const toParam = parseDate(req.query.to);
-
-        const now = new Date();
-        const defaultTo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-        const toDate = toParam ?? defaultTo;
-        const defaultFrom = new Date(toDate);
-        defaultFrom.setUTCDate(defaultFrom.getUTCDate() - 13);
-        const fromDate = fromParam ?? defaultFrom;
-
-        if (fromDate > toDate) {
-        return res.status(400).json({
-            error: 'Invalid date range: `from` must be before or equal to `to`.',
-        });
-        }
-
-        const fromDateStr = formatDate(fromDate);
-        const toDateStr = formatDate(toDate);
-
-        const [hasMoodScoreResult, eventCategoryColumnResult] = await Promise.all([
+    const [upcomingEventsCountResult, upcomingEventsResult, recentMoodsResult, connectionsCountResult, moodDaysResult] =
+      await Promise.all([
+        pool.query('SELECT COUNT(*) AS count FROM events WHERE event_date >= CURRENT_DATE'),
         pool.query(
-            `SELECT EXISTS (
-            SELECT 1
-            FROM information_schema.columns
-            WHERE table_name = 'mood_logs'
-                AND column_name = 'mood_score'
-            ) AS has_mood_score`
-        ),
-        pool.query(
-            `SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = 'events'
-            AND column_name IN ('category', 'type')
-            ORDER BY CASE WHEN column_name = 'category' THEN 0 ELSE 1 END
-            LIMIT 1`
-        ),
-        ]);
-
-        const hasMoodScore = Boolean(hasMoodScoreResult.rows[0]?.has_mood_score);
-        const availableEventCategoryColumn = eventCategoryColumnResult.rows[0]?.column_name;
-        const eventCategoryColumn = ['category', 'type'].includes(availableEventCategoryColumn)
-        ? availableEventCategoryColumn
-        : 'type';
-
-        const [
-        upcomingEventsCountResult,
-        eventsByCategoryTop5Result,
-        moodLogsTotalResult,
-        connectionsTotalResult,
-        moodTrendDailyResult,
-        eventsByCategoryResult,
-        upcomingEventsListResult,
-        recentMoodsResult,
-        recentConnectionsResult,
-        ] = await Promise.all([
-        pool.query(`SELECT COUNT(*) AS count FROM events WHERE event_date >= NOW()`),
-        pool.query(
-            `SELECT ${eventCategoryColumn} AS category, COUNT(*) AS count
-            FROM events
-            GROUP BY ${eventCategoryColumn}
-            ORDER BY count DESC
+          `SELECT id, title, event_date, event_time, location
+             FROM events
+            WHERE event_date >= CURRENT_DATE
+            ORDER BY event_date ASC, event_time ASC
             LIMIT 5`
         ),
         pool.query(
-            `SELECT COUNT(*) AS count
-            FROM mood_logs
-            WHERE created_at::date BETWEEN $1 AND $2`,
-            [fromDateStr, toDateStr]
-        ),
-        pool.query(`SELECT COUNT(*) AS count FROM connections`),
-        pool.query(
-            `SELECT TO_CHAR(created_at::date, 'YYYY-MM-DD') AS day, COUNT(*) AS count
-            FROM mood_logs
-            WHERE created_at::date BETWEEN $1 AND $2
-            GROUP BY day
-            ORDER BY day`,
-            [fromDateStr, toDateStr]
-        ),
-        pool.query(
-            `SELECT ${eventCategoryColumn} AS category, COUNT(*) AS count
-            FROM events
-            GROUP BY ${eventCategoryColumn}
-            ORDER BY count DESC`
-        ),
-        pool.query(
-            `SELECT id, title, ${eventCategoryColumn} AS category, event_date, event_time, location
-            FROM events
-            WHERE event_date >= NOW()
-            ORDER BY event_date ASC, event_time ASC
-            LIMIT 10`
-        ),
-        pool.query(
-            `SELECT *
-            FROM mood_logs
+          `SELECT id, score, notes, created_at
+             FROM mood_logs
+            WHERE user_id = $1
             ORDER BY created_at DESC
-            LIMIT 10`
+            LIMIT 5`,
+          [user.id]
         ),
         pool.query(
-            `SELECT *
-            FROM connections
-            ORDER BY created_at DESC
-            LIMIT 10`
+          `SELECT COUNT(*) AS count
+             FROM connections
+            WHERE user1_id = $1 OR user2_id = $1`,
+          [user.id]
         ),
-        ]);
+        pool.query(
+          `SELECT created_at::date AS day
+             FROM mood_logs
+            WHERE user_id = $1
+            ORDER BY day DESC
+            LIMIT 30`,
+          [user.id]
+        ),
+      ]);
 
-        const weeklyAvgMoodResult = hasMoodScore
-        ? await pool.query(
-            `SELECT TO_CHAR(date_trunc('week', created_at), 'IYYY-IW') AS week, AVG(mood_score)::numeric(10,2) AS avg_score
-            FROM mood_logs
-            WHERE created_at::date BETWEEN $1 AND $2
-            GROUP BY week
-            ORDER BY week`,
-            [fromDateStr, toDateStr]
-            )
-        : null;
+    const upcomingEventsCount = Number(upcomingEventsCountResult.rows[0]?.count ?? 0);
+    const connectionsCount = Number(connectionsCountResult.rows[0]?.count ?? 0);
 
-        const response = {
-        filters: {
-            from: fromDateStr,
-            to: toDateStr,
-        },
-        kpis: {
-            upcomingEvents: Number(upcomingEventsCountResult.rows[0]?.count ?? 0),
-            eventsByCategoryTop5: eventsByCategoryTop5Result.rows.map((row) => ({
-            category: row.category,
-            count: Number(row.count),
-            })),
-            moodLogsTotalInRange: Number(moodLogsTotalResult.rows[0]?.count ?? 0),
-            connectionsTotal: Number(connectionsTotalResult.rows[0]?.count ?? 0),
-            weeklyAvgMood: hasMoodScore
-            ? weeklyAvgMoodResult.rows.map((row) => ({
-                week: row.week,
-                avgScore: Number(row.avg_score),
-                }))
-            : null,
-        },
-        charts: {
-            moodTrendDaily: moodTrendDailyResult.rows.map((row) => ({
-            day: row.day,
-            count: Number(row.count),
-            })),
-            eventsByCategory: eventsByCategoryResult.rows.map((row) => ({
-            category: row.category,
-            count: Number(row.count),
-            })),
-        },
-        tables: {
-            upcomingEvents: upcomingEventsListResult.rows,
-            recentMoods: recentMoodsResult.rows,
-            recentConnections: recentConnectionsResult.rows,
-        },
-        meta: {
-            hasMoodScore,
-            notes: [
-            'Date filters default to the last 14 days when not provided.',
-            'Aggregated metrics derived from events, mood_logs, and connections tables.',
-            `Event category aggregations use the "${eventCategoryColumn}" column when available.`,
-            ],
-        },
-        };
-
-        res.json(response);
-    } catch (error) {
-        console.error('Error building dashboard metrics:', error);
-        res.status(500).json({
-        error: 'Unable to build dashboard metrics.',
-        details: error.message,
-        });
-    }
+    const uniqueMoodDays = [];
+    const seenMoodDays = new Set();
+    moodDaysResult.rows.forEach(({ day }) => {
+      if (!day) return;
+      const dayStr = day instanceof Date ? day.toISOString().slice(0, 10) : String(day);
+      if (!seenMoodDays.has(dayStr)) {
+        seenMoodDays.add(dayStr);
+        uniqueMoodDays.push(dayStr);
+      }
     });
+
+    uniqueMoodDays.sort((a, b) => (a === b ? 0 : a < b ? 1 : -1));
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    let streak = 0;
+    let cursor = new Date(today);
+
+    for (const dayStr of uniqueMoodDays) {
+      const dayDate = new Date(`${dayStr}T00:00:00Z`);
+      if (dayDate.getTime() === cursor.getTime()) {
+        streak += 1;
+        cursor = new Date(cursor);
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
+      } else if (dayDate.getTime() > cursor.getTime()) {
+        // Skip duplicate entries within the same day that might appear later in the array
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    const currentPath = (`${req.baseUrl || ''}${req.path || ''}`).replace(/\/+$/, '') || '/';
+
+    res.render('dashboard', {
+      title: 'Dashboard',
+      user,
+      role: user.role,
+      currentPath,
+      stats: {
+        upcomingEventsCount,
+        moodStreakDays: streak,
+        connectionsCount,
+      },
+      recentEvents: upcomingEventsResult.rows,
+      recentMoods: recentMoodsResult.rows,
+    });
+  } catch (error) {
+    console.error('Error loading dashboard:', error);
+    res.status(500).render('error', {
+      title: 'Dashboard Error',
+      message: 'Unable to load dashboard right now.',
+      error,
+    });
+  }
+});

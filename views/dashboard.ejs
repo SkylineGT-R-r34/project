@@ -44,21 +44,21 @@
           <div class="tile-subtitle">
             <%= (stats && Number.isFinite(stats.upcomingEventsCount)) ? stats.upcomingEventsCount : 0 %> scheduled
           </div>
-          <a class="tile-link" href="/events">Open Events</a>
+          <a class="tile-link" href="/events/event">Open Events</a>
         </li>
         <li class="tile">
           <div class="tile-title">🙂 Mood streak</div>
           <div class="tile-subtitle">
             <%= (stats && Number.isFinite(stats.moodStreakDays)) ? stats.moodStreakDays : 0 %> days
           </div>
-          <a class="tile-link" href="/mood">Open Mood</a>
+          <a class="tile-link" href="/moodTracking/moodTrackingPage">Open Mood Tracking</a>
         </li>
         <li class="tile">
           <div class="tile-title">🤝 Connections</div>
           <div class="tile-subtitle">
             <%= (stats && Number.isFinite(stats.connectionsCount)) ? stats.connectionsCount : 0 %> people
           </div>
-          <a class="tile-link" href="/social">Open Social</a>
+          <a class="tile-link" href="/social/social">Open Social</a>
         </li>
       </ul>
     </div>
@@ -74,13 +74,13 @@
               <div class="event-meta">
                 <span><%= ev.location || 'TBA' %></span>
                 <span>•</span>
-                <span><%= new Date(ev.date).toLocaleDateString() %></span>
+                <span><%= new Date(ev.event_date).toLocaleDateString() %></span>
               </div>
-              <a class="event-link" href="/events">Details</a>
+              <a class="event-link" href="/events/event">Details</a>
             </li>
           <% }) %>
         <% } else { %>
-          <li class="event-item empty">No upcoming events. <a href="/events">Create one</a>.</li>
+          <li class="event-item empty">No upcoming events. <a href="/events/event">Create one</a>.</li>
         <% } %>
       </ul>
     </div>
@@ -99,7 +99,7 @@
             </li>
           <% }) %>
         <% } else { %>
-          <li class="mood-item empty">No mood logs yet. <a href="/mood">Log today’s mood</a>.</li>
+          <li class="mood-item empty">No mood logs yet. <a href="/moodTracking/moodTrackingPage">Log today’s mood</a>.</li>
         <% } %>
       </ul>
     </div>
@@ -108,9 +108,9 @@
     <div id="shortcuts" class="events-container">
       <h2>Shortcuts</h2>
       <ul class="tile-list">
-        <li class="tile"><a class="tile-link" href="/events"> New Event</a></li>
-        <li class="tile"><a class="tile-link" href="/mood"> Log Mood</a></li>
-        <li class="tile"><a class="tile-link" href="/social"> Find People</a></li>
+        <li class="tile"><a class="tile-link" href="/events/event"> New Event</a></li>
+        <li class="tile"><a class="tile-link" href="/moodTracking/moodTrackingPage"> Log Mood</a></li>
+        <li class="tile"><a class="tile-link" href="/social/social"> Find People</a></li>
       </ul>
     </div>
   </div>

@@ -4,13 +4,14 @@ import { authenticateToken } from "../middleware/auth.js";
 export const eventRouter = express.Router();
 // Render events page
 
-eventRouter.get('/event',authenticateToken,(req, res) => {
-  const role = req.user?.role || 'student'; 
+eventRouter.get('/event', authenticateToken, (req, res) => {
+  const role = req.user?.role || 'student';
+  const currentPath = (`${req.baseUrl || ''}${req.path || ''}`).replace(/\/+$/, '') || '/';
   res.render('event', {
     title: 'Events',
-    role: req.user.role,      
-    currentPath: req.path,
-    user_id: req.user.id
+    role,
+    currentPath,
+    user_id: req.user.id,
   });
 });
 eventRouter.get("/", authenticateToken,async (req, res) => {
